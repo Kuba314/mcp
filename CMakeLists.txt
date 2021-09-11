@@ -24,22 +24,30 @@ enable_testing()
 
 include(GoogleTest)
 
-# add coverage target
-if(CMAKE_COMPILER_IS_GNUCXX)
-    list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
+# # add coverage target
+# if(CMAKE_COMPILER_IS_GNUCXX)
+#     list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
+#     include(CodeCoverage)
+#     append_coverage_compiler_flags()
 
-    # exclude system header files, google deps and tests
-    set(COVERAGE_LCOV_EXCLUDES "/usr/include/*" "build/_deps/*" "tests/*")
-    SETUP_TARGET_FOR_COVERAGE_LCOV(
-        NAME coverage
-        EXECUTABLE ${PROJECT_TEST_NAME}
-        DEPENDENCIES ${PROJECT_TEST_NAME})
-endif()
+#     # exclude system header files, google deps and tests
+#     set(COVERAGE_LCOV_EXCLUDES "/usr/include/*" "build/_deps/*" "tests/*")
+#     SETUP_TARGET_FOR_COVERAGE_LCOV(
+#         NAME coverage
+#         EXECUTABLE ${PROJECT_TEST_NAME}
+#         DEPENDENCIES ${PROJECT_TEST_NAME})
+# endif()
 
+find_package(ZLIB)
+
+file(GLOB_RECURSE PACKET_FILES src/packets/*.c)
 set(SOURCE_FILES
     src/varint.c
+    src/packet.c
+    src/connection.c
+    src/unionstream.c
+    src/sockbuff.c
+    ${PACKET_FILES}
 )
 
 # add test files and link them
@@ -48,5 +56,11 @@ add_executable(${PROJECT_TEST_NAME}
     ${TEST_FILES}
     ${SOURCE_FILES}
 )
-target_link_libraries(${PROJECT_TEST_NAME} gtest_main)
+target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB)
 gtest_discover_tests(${PROJECT_TEST_NAME})
+
+add_executable(main
+    src/main.c
+    ${SOURCE_FILES}
+)
+target_link_libraries(main ZLIB::ZLIB)

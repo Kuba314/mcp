@@ -2,7 +2,10 @@
 
 #include <stdint.h>
 
-int read_varint(int sockfd, int32_t *result);
-int write_varint(int sockfd, int32_t value);
-int read_varlong(int sockfd, int64_t *result);
-int write_varlong(int sockfd, int64_t value);
+#include "unionstream.h"
+
+int read_varint(unionstream_t stream, int32_t *result, uint8_t *n_read);
+int read_varlong(unionstream_t stream, int64_t *result, uint8_t *n_read);
+
+uint8_t format_varint(uint8_t bytes[5], uint32_t value);
+uint8_t format_varlong(uint8_t bytes[10], uint64_t value);

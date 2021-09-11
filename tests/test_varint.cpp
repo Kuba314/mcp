@@ -7,9 +7,10 @@ extern "C" {
     #include <stdint.h>
 
     #include "varint.h"
+    #include "unionstream.h"
 }
 
-class VarType : public ::testing::Test {
+class VarTypePipe : public ::testing::Test {
   protected:
     virtual void SetUp() override {
         int err = pipe(fd);
@@ -18,6 +19,8 @@ class VarType : public ::testing::Test {
         if(err != 0) {
             throw std::bad_alloc();
         }
+        us[0].sockfd = fd[0];
+        us[1].sockfd = fd[1];
     }
     virtual void TearDown() override {
         close(fd[0]);
@@ -25,168 +28,167 @@ class VarType : public ::testing::Test {
     }
 
     int fd[2];
+    unionstream_t us[2];
 };
 
 // ---------------------------------------------------------------- read varint
-TEST_F(VarType, VIntReadSingleByte) {
+TEST_F(VarTypePipe, VIntReadSingleByte) {
     const uint8_t bytes[] = { 0x7f };
     const int32_t expected = 127;
     write(fd[1], bytes, sizeof(bytes));
 
     int32_t value;
-    int err = read_varint(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varint(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VIntReadMultipleBytes) {
+TEST_F(VarTypePipe, VIntReadMultipleBytes) {
     const uint8_t bytes[] = { 0xff, 0x03 };
     const int32_t expected = 511;
     write(fd[1], bytes, sizeof(bytes));
 
     int32_t value;
-    int err = read_varint(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varint(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VIntReadNegativeNumber) {
+TEST_F(VarTypePipe, VIntReadNegativeNumber) {
     const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, 0x0f };
     const int32_t expected = -1;
     write(fd[1], bytes, sizeof(bytes));
 
     int32_t value;
-    int err = read_varint(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varint(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VIntReadTooManyBytes) {
+TEST_F(VarTypePipe, VIntReadTooManyBytes) {
     const uint8_t bytes[] = { 0x80, 0x80, 0x80, 0x80, 0x80 };
     const int32_t expected = -1;
     write(fd[1], bytes, sizeof(bytes));
 
     int32_t value;
-    int err = read_varint(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varint(us[0], &value, &n_read);
     ASSERT_EQ(err, 1);
+    ASSERT_EQ(n_read, sizeof(bytes));
 }
 
 // ---------------------------------------------------------------- write varint
-TEST_F(VarType, VIntWriteSingleByte) {
+TEST(VarTypeFormat, VIntWriteSingleByte) {
     const int32_t value = 127;
     const uint8_t bytes[] = { 0x7f };
-    int err = write_varint(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[5];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varint(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }
-TEST_F(VarType, VIntWriteMultipleBytes) {
+TEST(VarTypeFormat, VIntWriteMultipleBytes) {
     const int32_t value = 511;
     const uint8_t bytes[] = { 0xff, 0x03 };
-    int err = write_varint(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[5];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varint(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }
-TEST_F(VarType, VIntWriteNegativeNumber) {
+TEST(VarTypeFormat, VIntWriteNegativeNumber) {
     const int32_t value = -1;
     const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, 0x0f };
-    int err = write_varint(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[5];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varint(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }
 
 // ---------------------------------------------------------------- read varlong
-TEST_F(VarType, VLongReadSingleByte) {
+TEST_F(VarTypePipe, VLongReadSingleByte) {
     const uint8_t bytes[] = { 0x7f };
     const int64_t expected = 127;
     write(fd[1], bytes, sizeof(bytes));
 
     int64_t value;
-    int err = read_varlong(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varlong(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VLongReadMultipleBytes) {
+TEST_F(VarTypePipe, VLongReadMultipleBytes) {
     const uint8_t bytes[] = { 0xff, 0x03 };
     const int64_t expected = 511;
     write(fd[1], bytes, sizeof(bytes));
 
     int64_t value;
-    int err = read_varlong(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varlong(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VLongReadNegativeNumber) {
+TEST_F(VarTypePipe, VLongReadNegativeNumber) {
     const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01 };
     const int64_t expected = -1;
     write(fd[1], bytes, sizeof(bytes));
 
     int64_t value;
-    int err = read_varlong(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varlong(us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
+    ASSERT_EQ(n_read, sizeof(bytes));
 
     EXPECT_EQ(expected, value);
 }
-TEST_F(VarType, VLongReadTooManyBytes) {
+TEST_F(VarTypePipe, VLongReadTooManyBytes) {
     const uint8_t bytes[] = { 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 };
     const int64_t expected = -1;
     write(fd[1], bytes, sizeof(bytes));
 
     int64_t value;
-    int err = read_varlong(fd[0], &value);
+    uint8_t n_read;
+    int err = read_varlong(us[0], &value, &n_read);
     ASSERT_EQ(err, 1);
+    ASSERT_EQ(n_read, sizeof(bytes));
 }
 
 // ---------------------------------------------------------------- write varlong
-TEST_F(VarType, VLongWriteSingleByte) {
+TEST(VarTypeFormat, VLongWriteSingleByte) {
     const int64_t value = 127;
     const uint8_t bytes[] = { 0x7f };
-    int err = write_varlong(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[10];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varlong(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }
-TEST_F(VarType, VLongWriteMultipleBytes) {
+TEST(VarTypeFormat, VLongWriteMultipleBytes) {
     const int64_t value = 511;
     const uint8_t bytes[] = { 0xff, 0x03 };
-    int err = write_varlong(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[10];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varlong(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }
-TEST_F(VarType, VLongWriteNegativeNumber) {
+TEST(VarTypeFormat, VLongWriteNegativeNumber) {
     const int64_t value = -1;
     const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01 };
-    int err = write_varlong(fd[1], value);
-    ASSERT_EQ(err, 0);
+    uint8_t out_bytes[10];
 
-    for(uint8_t i = 0; i < sizeof(bytes); i++) {
-        uint8_t byte;
-        EXPECT_EQ(read(fd[0], &byte, 1), 1);
-        EXPECT_EQ(byte, bytes[i]);
-    }
+    uint8_t n_written = format_varlong(out_bytes, value);
+    EXPECT_EQ(n_written, sizeof(bytes));
+    EXPECT_EQ(memcmp(bytes, out_bytes, sizeof(bytes)), 0);
 }

@@ -3,6 +3,7 @@ IndentWidth: 4
 MaxEmptyLinesToKeep: 1
 SpaceBeforeParens: Never
 SpaceAfterCStyleCast: true
+Cpp11BracedListStyle: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
@@ -15,5 +16,7 @@ IncludeCategories:
     Priority:        1
   - Regex:           '^"'
     Priority:        2
+BraceWrapping:
+    AfterFunction: true
 IndentExternBlock: Indent
 IndentPPDirectives: BeforeHash
