@@ -1,0 +1,19 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+MaxEmptyLinesToKeep: 1
+SpaceBeforeParens: Never
+SpaceAfterCStyleCast: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^<'
+    Priority:        1
+  - Regex:           '^"'
+    Priority:        2
+IndentExternBlock: Indent
+IndentPPDirectives: BeforeHash
