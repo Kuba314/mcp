@@ -39,6 +39,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 set(SOURCE_FILES
+    src/varint.c
 )
 
 # add test files and link them
