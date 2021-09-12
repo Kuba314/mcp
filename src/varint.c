@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int read_varint(unionstream_t stream, int32_t *result, uint8_t *n_read) {
+int read_varint(unionstream_t *stream, int32_t *result, uint8_t *n_read) {
     uint8_t bit_offset = 0;
     uint8_t curr_byte = 0;
 
@@ -34,7 +34,7 @@ int read_varint(unionstream_t stream, int32_t *result, uint8_t *n_read) {
     return 0;
 }
 
-int read_varlong(unionstream_t stream, int64_t *result, uint8_t *n_read) {
+int read_varlong(unionstream_t *stream, int64_t *result, uint8_t *n_read) {
     uint8_t bit_offset = 0;
     uint8_t curr_byte;
 
@@ -92,4 +92,14 @@ uint8_t format_varlong(uint8_t bytes[10], uint64_t value) {
     }
 
     return n_written;
+}
+
+int read_varint_fd(int sockfd, int32_t *result, uint8_t *n_read) {
+    unionstream_t stream = { .sockfd = sockfd, .length = 5 };
+    return read_varint(&stream, result, n_read);
+}
+
+int read_varlong_fd(int sockfd, int64_t *result, uint8_t *n_read) {
+    unionstream_t stream = { .sockfd = sockfd, .length = 10 };
+    return read_varlong(&stream, result, n_read);
 }

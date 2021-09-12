@@ -39,7 +39,7 @@ TEST_F(VarTypePipe, VIntReadSingleByte) {
 
     int32_t value;
     uint8_t n_read;
-    int err = read_varint(us[0], &value, &n_read);
+    int err = read_varint(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -52,7 +52,7 @@ TEST_F(VarTypePipe, VIntReadMultipleBytes) {
 
     int32_t value;
     uint8_t n_read;
-    int err = read_varint(us[0], &value, &n_read);
+    int err = read_varint(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -65,7 +65,7 @@ TEST_F(VarTypePipe, VIntReadNegativeNumber) {
 
     int32_t value;
     uint8_t n_read;
-    int err = read_varint(us[0], &value, &n_read);
+    int err = read_varint(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -78,7 +78,7 @@ TEST_F(VarTypePipe, VIntReadTooManyBytes) {
 
     int32_t value;
     uint8_t n_read;
-    int err = read_varint(us[0], &value, &n_read);
+    int err = read_varint(&us[0], &value, &n_read);
     ASSERT_EQ(err, 1);
     ASSERT_EQ(n_read, sizeof(bytes));
 }
@@ -120,7 +120,7 @@ TEST_F(VarTypePipe, VLongReadSingleByte) {
 
     int64_t value;
     uint8_t n_read;
-    int err = read_varlong(us[0], &value, &n_read);
+    int err = read_varlong(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -133,7 +133,7 @@ TEST_F(VarTypePipe, VLongReadMultipleBytes) {
 
     int64_t value;
     uint8_t n_read;
-    int err = read_varlong(us[0], &value, &n_read);
+    int err = read_varlong(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -146,7 +146,7 @@ TEST_F(VarTypePipe, VLongReadNegativeNumber) {
 
     int64_t value;
     uint8_t n_read;
-    int err = read_varlong(us[0], &value, &n_read);
+    int err = read_varlong(&us[0], &value, &n_read);
     ASSERT_EQ(err, 0);
     ASSERT_EQ(n_read, sizeof(bytes));
 
@@ -159,7 +159,7 @@ TEST_F(VarTypePipe, VLongReadTooManyBytes) {
 
     int64_t value;
     uint8_t n_read;
-    int err = read_varlong(us[0], &value, &n_read);
+    int err = read_varlong(&us[0], &value, &n_read);
     ASSERT_EQ(err, 1);
     ASSERT_EQ(n_read, sizeof(bytes));
 }

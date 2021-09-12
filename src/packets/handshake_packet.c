@@ -1,8 +1,10 @@
 #include "sockbuff.h"
-#include "check.h"
 
 #include <sys/socket.h>
 #include <string.h>
+
+#include "packet.h"
+#include "check.h"
 
 int send_Handshake(int sockfd, int32_t proto_version, uint8_t next_state)
 {
@@ -15,6 +17,12 @@ int send_Handshake(int sockfd, int32_t proto_version, uint8_t next_state)
     FINE_ON_WITH(0, 1, sockbuff_write_short(buff, 25565));
     FINE_ON_WITH(0, 1, sockbuff_write_byte(buff, next_state));
     sockbuff_dumpto(buff, sockfd);
+
+    if(next_state == 1) {
+        connection_state = CONN_STATE_STATUS;
+    } else if(next_state == 2) {
+        connection_state = CONN_STATE_LOGIN;
+    }
 
     return 0;
 }

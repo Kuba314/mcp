@@ -9,7 +9,7 @@ typedef struct {
     size_t alloc_length;
 } sockbuff_t;
 
-#define SOCKBUFF_INITIAL_SIZE 1
+#define SOCKBUFF_INITIAL_SIZE 64
 
 sockbuff_t *sockbuff_create();
 int sockbuff_write(sockbuff_t *buff, const void *src, size_t length);

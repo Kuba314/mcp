@@ -12,7 +12,7 @@ static int _get_packet_stream_uncompressed(int sockfd, int32_t packet_length, un
 {
     // read packet id
     uint8_t n_read;
-    if(read_varint(SOCK2STREAM(sockfd), packet_id, &n_read)) {
+    if(read_varint_fd(sockfd, packet_id, &n_read)) {
         return 1;
     }
 
@@ -24,6 +24,7 @@ static int _get_packet_stream_uncompressed(int sockfd, int32_t packet_length, un
 
     stream->sockfd = sockfd;
     stream->length = data_length;
+    stream->offset = 0;
     return 0;
 }
 
@@ -32,7 +33,7 @@ static int _get_packet_stream_compressed(int sockfd, int32_t packet_length, unio
     // read uncompressed data length
     int32_t data_length;
     uint8_t data_length_length;
-    if(read_varint(SOCK2STREAM(sockfd), &data_length, &data_length_length)) {
+    if(read_varint_fd(sockfd, &data_length, &data_length_length)) {
         return 1;
     }
 
@@ -64,6 +65,7 @@ static int _get_packet_stream_compressed(int sockfd, int32_t packet_length, unio
 
     // inflate packet data
     stream->length = data_length;
+    stream->offset = 0;
     stream->infstream.zalloc = Z_NULL;
     stream->infstream.zfree = Z_NULL;
     stream->infstream.opaque = Z_NULL;
@@ -73,7 +75,7 @@ static int _get_packet_stream_compressed(int sockfd, int32_t packet_length, unio
 
     inflateInit(&stream->infstream);
 
-    stream_read(*stream, packet_id, 1);
+    stream_read(stream, (uint8_t *) packet_id, 1);
     return 0;
 }
 
@@ -81,7 +83,7 @@ int get_packet_stream(int sockfd, bool compression_enabled, unionstream_t *strea
 {
     // read packet length
     int32_t packet_length;
-    if(read_varint(SOCK2STREAM(sockfd), &packet_length, NULL)) {
+    if(read_varint_fd(sockfd, &packet_length, NULL)) {
         return 1;
     }
 
@@ -100,12 +102,71 @@ int get_packet_stream(int sockfd, bool compression_enabled, unionstream_t *strea
     }
 }
 
-void handle_play_packet(int32_t packet_id, unionstream_t stream)
+conn_state_t connection_state = CONN_STATE_HANDSHAKE;
+void handle_packet(int32_t packet_id, unionstream_t *stream)
 {
-    void (* packet_handlers[])(unionstream_t) = {
-        NULL
+    static void (* const handshake_packet_handlers[])(unionstream_t *) = {
+        NULL,
+    };
+    static void (* const status_packet_handlers[])(unionstream_t *) = {
+        on_server_status_response,
+        // on_server_pong,
+        NULL,
+    };
+    static void (* const login_packet_handlers[])(unionstream_t *) = {
+        // on_login_disconnect,
+        // on_encryption_request,
+        // on_login_success,
+        // on_set_compression,
+        // on_login_plugin_request,
+        NULL,
+    };
+    static void (* const play_packet_handlers[])(unionstream_t *) = {
+        // on_spawn_entity
+        // ...
+        NULL,
     };
 
+    static void (* const *all_packet_handlers[])(unionstream_t *) = {
+        handshake_packet_handlers,
+        status_packet_handlers,
+        login_packet_handlers,
+        play_packet_handlers,
+    };
+    static size_t n_handlers[] = {
+        sizeof(handshake_packet_handlers) / sizeof(*handshake_packet_handlers),
+        sizeof(status_packet_handlers) / sizeof(*status_packet_handlers),
+        sizeof(login_packet_handlers) / sizeof(*login_packet_handlers),
+        sizeof(play_packet_handlers) / sizeof(*play_packet_handlers),
+    };
+
+
+    void (*f)(unionstream_t *);
+    if((uint32_t) packet_id >= n_handlers[connection_state] || (f = all_packet_handlers[connection_state][packet_id]) != NULL) {
+
+        fprintf(stderr, "No packet handler for state %d and packet id %d, dumping\n", connection_state, packet_id);
+
+        void *tmp = malloc(stream->length - stream->offset);
+        if(tmp == NULL) {
+            perror("dumping");
+            return;
+        }
+        stream_read(stream, tmp, stream->length - stream->offset);
+
+        return;
+    }
+
     // call packet handler
-    packet_handlers[packet_id](stream);
+    f(stream);
+}
+
+void on_server_status_response(unionstream_t *stream) {
+
+    fprintf(stderr, "got server status response:\n\t");
+    unsigned char c;
+    for(size_t i = 0; i < stream->length; i++) {
+        stream_read(stream, &c, 1);
+        printf("%c", c);
+    }
+    printf("\n");
 }
