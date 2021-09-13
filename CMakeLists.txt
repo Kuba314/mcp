@@ -55,16 +55,17 @@ set(SOURCE_FILES
     ${HANDLER_FILES}
     src/crypto/encrypt_auth_pair.c
     src/crypto/enc_socket.c
+    src/crypto/packet_encryption.c
 )
 
-# add test files and link them
-file(GLOB_RECURSE TEST_FILES tests/*.cpp)
-add_executable(${PROJECT_TEST_NAME}
-    ${TEST_FILES}
-    ${SOURCE_FILES}
-)
-target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL)
-gtest_discover_tests(${PROJECT_TEST_NAME})
+# # add test files and link them
+# file(GLOB_RECURSE TEST_FILES tests/*.cpp)
+# add_executable(${PROJECT_TEST_NAME}
+#     ${TEST_FILES}
+#     ${SOURCE_FILES}
+# )
+# target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL)
+# gtest_discover_tests(${PROJECT_TEST_NAME})
 
 add_executable(main
     src/main.c

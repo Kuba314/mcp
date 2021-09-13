@@ -8,7 +8,7 @@
 #include "varint.h"
 #include "debug.h"
 
-static void sockbuff_free(sockbuff_t *buff) {
+void sockbuff_free(sockbuff_t *buff) {
     if(buff->data != NULL) {
         free(buff->data);
     }
@@ -51,26 +51,6 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length) {
     memcpy(buff->data + buff->length, src, length);
     buff->length = new_length;
     return 0;
-}
-void sockbuff_dumpto(sockbuff_t *buff, int sockfd) {
-    uint8_t bytes[5];
-    size_t n_bytes = format_varint(bytes, buff->length);
-
-    debug_begin("sockbuff", "sending \"");
-    for(size_t i = 0; i < n_bytes; i++) {
-        debug_frag("\\x%02x", bytes[i]);
-    }
-
-    send(sockfd, bytes, n_bytes, 0);
-    send(sockfd, buff->data, buff->length, 0);
-
-    for(size_t i = 0; i < buff->length; i++) {
-        debug_frag("\\x%02x", buff->data[i]);
-    }
-    debug_frag("\"");
-    debug_end();
-
-    sockbuff_free(buff);
 }
 
 extern int sockbuff_write_byte(sockbuff_t *buff, uint8_t byte);

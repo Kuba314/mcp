@@ -3,8 +3,9 @@
 #include "_string.h"
 #include "debug.h"
 #include "sockbuff.h"
+#include "unionstream.h"
 
-int send_EncryptionResponse(int sockfd, size_t secret_length,
+int send_EncryptionResponse(unionstream_t *stream, size_t secret_length,
                             const char *secret, size_t token_length,
                             const char *token) {
 
@@ -21,6 +22,7 @@ int send_EncryptionResponse(int sockfd, size_t secret_length,
         return err;
     }
 
-    sockbuff_dumpto(buff, sockfd);
+    stream_write_packet(stream, buff->data, buff->length);
+    sockbuff_free(buff);
     return 0;
 }

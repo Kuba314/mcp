@@ -1,7 +1,8 @@
 #include "sockbuff.h"
+#include "unionstream.h"
 #include "packet_handler.h"
 
-int send_Handshake(int sockfd, int32_t proto_version, uint8_t next_state) {
+int send_Handshake(unionstream_t *stream, int32_t proto_version, uint8_t next_state) {
     sockbuff_t *buff = sockbuff_create();
     if(buff == NULL) {
         return 1;
@@ -23,6 +24,7 @@ int send_Handshake(int sockfd, int32_t proto_version, uint8_t next_state) {
         connection_state = CONN_STATE_LOGIN;
     }
 
-    sockbuff_dumpto(buff, sockfd);
+    stream_write_packet(stream, buff->data, buff->length);
+    sockbuff_free(buff);
     return 0;
 }

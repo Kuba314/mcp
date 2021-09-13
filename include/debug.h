@@ -39,8 +39,17 @@
     #define verbose_begin(category, msg, ...) _debug_begin(DBG_GRAY, category, msg, ##__VA_ARGS__)
     #define verbose_frag(msg, ...) _debug_frag(msg, ##__VA_ARGS__)
     #define verbose_end() fprintf(stderr, "\n")
+
 #else
-    #define _debug(...)
-    #define _debug_begin(...)
-    #define _debug_frag(...)
+    #define debug(...)
+    #define debug_begin(...)
+    #define debug_frag(...)
+    #define debug_end(...)
+
+    #define verbose(...)
+    #define verbose_begin(...)
+    #define verbose_frag(...)
+    #define verbose_end(...)
 #endif
+
+#define alloc_error(n_bytes) error("alloc", "Failed to allocate %d bytes", n_bytes)

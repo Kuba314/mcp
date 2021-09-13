@@ -18,12 +18,12 @@
 #define HYPIXEL_IP "172.65.234.205"
 #define LOCALHOST "127.0.0.1"
 
-int perform_handshake(int sockfd, int32_t proto_version, const char *username) {
+int perform_handshake(unionstream_t *stream, int32_t proto_version, const char *username) {
     (void) username;
 
-    send_Handshake(sockfd, proto_version, 2);
+    send_Handshake(stream, proto_version, 2);
     // send_StatusRequest(sockfd);
-    send_LoginStart(sockfd, username);
+    send_LoginStart(stream, username);
 
     // auth
 
@@ -41,16 +41,31 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int ret = perform_handshake(sockfd, 47, "Techn0manCZ");
+    unionstream_t stream = {
+        .sockfd = sockfd,
+
+    };
+    int ret = perform_handshake(&stream, 47, "Techn0manCZ");
     (void) ret;
 
 
-    for(int i = 0; i < 1; i++) {
+    // for(int i = 0; i < 1; i++) {
+    while(true) {
 
-        // read packet
-        unionstream_t stream;
+        // load packet into memory
+        if(stream_load_packet(&stream)) {
+            return 1;
+        }
+
+        printf("packet: ");
+        for(size_t i = 0; i < stream.length; i++) {
+            printf("\\x%02x", stream.data[i]);
+        }
+        printf("\n");
+
+        // read packet id
         int32_t packet_id;
-        if(get_packet_stream(sockfd, false, &stream, &packet_id)) {
+        if(stream_read_varint(&stream, &packet_id)) {
             return 1;
         }
 
@@ -67,21 +82,21 @@ int main(int argc, char *argv[]) {
 
         stream_free(&stream);
     }
-    enc_socket_t *enc_sock = enc_socket_init(sockfd);
-    if(enc_sock == NULL) {
-        return 1;
-    }
-    uint8_t buff[21];
-    enc_socket_read(enc_sock, buff, 20);
-    // recv(sockfd, buff, 20, MSG_WAITALL);
+    // enc_socket_t *enc_sock = enc_socket_init(sockfd);
+    // if(enc_sock == NULL) {
+    //     return 1;
+    // }
+    // uint8_t buff[89 + 1];
+    // enc_socket_read(enc_sock, buff, 89);
+    // // recv(sockfd, buff, 89, MSG_WAITALL);
 
-    for(size_t i = 0; i < 20; i++) {
-        printf("%c", buff[i]);
-    }
-    printf("\n");
+    // for(size_t i = 0; i < 89; i++) {
+    //     printf("%c", buff[i]);
+    // }
+    // printf("\n");
 
-    // info("main", "%s\n", buff);
-    return 1;
+    // // info("main", "%s\n", buff);
+    // return 1;
 
     return 1;
 }

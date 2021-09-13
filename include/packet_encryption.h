@@ -2,5 +2,5 @@
 
 #include <stddef.h>
 
-int encrypt_AES(unsigned char *dst, const unsigned char *src, size_t length);
-int decrypt_AES(unsigned char *dst, const unsigned char *src, size_t length);
+int AES_encrypt(unsigned char *dst, const unsigned char *src, size_t length);
+int AES_decrypt(unsigned char *dst, const unsigned char *src, size_t length);

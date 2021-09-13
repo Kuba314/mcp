@@ -49,6 +49,7 @@ void handle_packet(int32_t packet_id, unionstream_t *stream) {
         void (*f)(unionstream_t *) =
             all_packet_handlers[connection_state][packet_id];
         if(f != NULL) {
+            debug("packet", "id: %d/%d", connection_state, packet_id);
             f(stream);
             return;
         }

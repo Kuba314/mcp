@@ -13,7 +13,7 @@ typedef struct {
 
 sockbuff_t *sockbuff_create();
 int sockbuff_write(sockbuff_t *buff, const void *src, size_t length);
-void sockbuff_dumpto(sockbuff_t *buff, int sockfd);
+void sockbuff_free(sockbuff_t *buff);
 
 int sockbuff_write_varint(sockbuff_t *buff, int32_t value);
 int sockbuff_write_varlong(sockbuff_t *buff, int64_t value);
