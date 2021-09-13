@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-int mc_connect(const char *ip, uint16_t port);
+int connect_to_server(const char *ip, uint16_t port);

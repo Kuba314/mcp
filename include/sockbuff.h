@@ -22,7 +22,7 @@ inline int sockbuff_write_byte(sockbuff_t *buff, uint8_t byte) {
     return sockbuff_write(buff, &byte, 1);
 }
 inline int sockbuff_write_short(sockbuff_t *buff, uint16_t value) {
-    uint8_t bytes[2] = {value >> 8, value & 0xff};
+    uint8_t bytes[2] = { value >> 8, value & 0xff };
     return sockbuff_write(buff, bytes, 2);
 }
 inline int sockbuff_write_string(sockbuff_t *buff, const char *src,

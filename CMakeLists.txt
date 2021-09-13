@@ -39,15 +39,22 @@ include(GoogleTest)
 # endif()
 
 find_package(ZLIB)
+find_package(OpenSSL)
 
 file(GLOB_RECURSE PACKET_FILES src/packets/*.c)
+file(GLOB_RECURSE HANDLER_FILES src/handlers/*.c)
 set(SOURCE_FILES
     src/varint.c
-    src/packet.c
+    src/string.c
     src/connection.c
     src/unionstream.c
     src/sockbuff.c
+    src/packet_stream.c
+    src/packet_handler.c
     ${PACKET_FILES}
+    ${HANDLER_FILES}
+    src/crypto/encrypt_auth_pair.c
+    src/crypto/enc_socket.c
 )
 
 # add test files and link them
@@ -56,11 +63,11 @@ add_executable(${PROJECT_TEST_NAME}
     ${TEST_FILES}
     ${SOURCE_FILES}
 )
-target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB)
+target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL)
 gtest_discover_tests(${PROJECT_TEST_NAME})
 
 add_executable(main
     src/main.c
     ${SOURCE_FILES}
 )
-target_link_libraries(main ZLIB::ZLIB)
+target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL)

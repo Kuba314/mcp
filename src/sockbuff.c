@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 
-#include "check.h"
 #include "varint.h"
+#include "debug.h"
 
 static void sockbuff_free(sockbuff_t *buff) {
     if(buff->data != NULL) {
@@ -54,16 +55,21 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length) {
 void sockbuff_dumpto(sockbuff_t *buff, int sockfd) {
     uint8_t bytes[5];
     size_t n_bytes = format_varint(bytes, buff->length);
-    printf("sending: \"");
+
+    debug_begin("sockbuff", "sending \"");
     for(size_t i = 0; i < n_bytes; i++) {
-        printf("\\x%02x", bytes[i]);
+        debug_frag("\\x%02x", bytes[i]);
     }
+
     send(sockfd, bytes, n_bytes, 0);
     send(sockfd, buff->data, buff->length, 0);
+
     for(size_t i = 0; i < buff->length; i++) {
-        printf("\\x%02x", buff->data[i]);
+        debug_frag("\\x%02x", buff->data[i]);
     }
-    printf("\"\n");
+    debug_frag("\"");
+    debug_end();
+
     sockbuff_free(buff);
 }
 

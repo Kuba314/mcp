@@ -1,8 +1,10 @@
 #include "varint.h"
-#include "unionstream.h"
 
 #include <stdio.h>
 #include <unistd.h>
+
+#include "unionstream.h"
+#include "debug.h"
 
 int read_varint(unionstream_t *stream, int32_t *result, uint8_t *n_read) {
     uint8_t bit_offset = 0;
@@ -12,9 +14,12 @@ int read_varint(unionstream_t *stream, int32_t *result, uint8_t *n_read) {
     if(n_read != NULL) {
         *n_read = 0;
     }
+
+    verbose_begin("varint", "reading: ");
     do {
         if(bit_offset == 35) {
-            fprintf(stderr, "read_varint: VarInt is too big (%d so far)\n", (int32_t) uresult);
+            fprintf(stderr, "read_varint: VarInt is too big (%d so far)\n",
+                    (int32_t) uresult);
             return 1;
         }
 
@@ -22,15 +27,19 @@ int read_varint(unionstream_t *stream, int32_t *result, uint8_t *n_read) {
             perror("read_varint");
             return 1;
         }
+
+        verbose_frag("\\x%02x", curr_byte);
         uresult |= (curr_byte & 0x7f) << bit_offset;
         if(n_read != NULL) {
             (*n_read)++;
         }
 
         bit_offset += 7;
-    } while (curr_byte & 0x80);
+    } while(curr_byte & 0x80);
 
     *result = (int32_t) uresult;
+    verbose_frag(" = %d", *result);
+    verbose_end();
     return 0;
 }
 
@@ -44,7 +53,8 @@ int read_varlong(unionstream_t *stream, int64_t *result, uint8_t *n_read) {
     }
     do {
         if(bit_offset == 70) {
-            fprintf(stderr, "read_varlong: VarLong is too big (%ld so far)\n", (int64_t) uresult);
+            fprintf(stderr, "read_varlong: VarLong is too big (%ld so far)\n",
+                    (int64_t) uresult);
             return 1;
         }
 
@@ -57,7 +67,7 @@ int read_varlong(unionstream_t *stream, int64_t *result, uint8_t *n_read) {
         }
 
         bit_offset += 7;
-    } while (curr_byte & 0x80);
+    } while(curr_byte & 0x80);
 
     *result = (int64_t) uresult;
     return 0;

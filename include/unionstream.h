@@ -1,13 +1,10 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <zlib.h>
-#include <sys/socket.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <zlib.h>
 
-#define SOCK2STREAM(sockfd) ((unionstream_t) {.is_compressed = 0, .sockfd = sockfd})
+#include "_string.h"
 
 typedef struct {
     union {
@@ -24,3 +21,5 @@ typedef struct {
 
 int stream_read(unionstream_t *stream, uint8_t *dst, size_t size);
 void stream_free(unionstream_t *stream);
+
+int stream_read_string(unionstream_t *stream, string_t *str);

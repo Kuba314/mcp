@@ -1,12 +1,19 @@
 #include "unionstream.h"
 
-#include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-int stream_read(unionstream_t *stream, uint8_t *dst, size_t size)
-{
+#include "varint.h"
+
+int stream_read(unionstream_t *stream, uint8_t *dst, size_t size) {
+    if(size <= 0) {
+        return 0;
+    }
     if(size > stream->length - stream->offset) {
-        fprintf(stderr, "stream_read: Requested size is larger than data left\n");
+        fprintf(stderr,
+                "stream_read: Requested size is larger than data left\n");
         return 1;
     }
 
@@ -28,6 +35,26 @@ int stream_read(unionstream_t *stream, uint8_t *dst, size_t size)
         stream->offset += size;
         return 0;
     }
+}
+
+int stream_read_string(unionstream_t *stream, string_t *str) {
+    int32_t length;
+    read_varint(stream, &length, NULL);
+
+    if(length < 0) {
+        return 1;
+    } else if(length == 0) {
+        *str = (string_t){ 0 };
+    } else {
+        str->s = malloc(length);
+        if(str->s == NULL) {
+            perror("stream_read_string");
+            return 1;
+        }
+        str->length = length;
+        stream_read(stream, str->s, length);
+    }
+    return 0;
 }
 
 void stream_free(unionstream_t *stream) {

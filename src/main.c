@@ -5,8 +5,15 @@
 #include "varint.h"
 
 #include "connection.h"
-#include "packet.h"
+#include "packets.h"
+#include "packet_stream.h"
+#include "packet_handler.h"
 #include "unionstream.h"
+
+#include <sys/socket.h>
+
+#include "enc_socket.h"
+#include "debug.h"
 
 #define HYPIXEL_IP "172.65.234.205"
 #define LOCALHOST "127.0.0.1"
@@ -28,8 +35,8 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-    int sockfd = mc_connect(HYPIXEL_IP, 25565);
-    // int sockfd = mc_connect(LOCALHOST, 25565);
+    int sockfd = connect_to_server(HYPIXEL_IP, 25565);
+    // int sockfd = connect_to_server(LOCALHOST, 25565);
     if(sockfd < 0) {
         return 1;
     }
@@ -37,7 +44,8 @@ int main(int argc, char *argv[]) {
     int ret = perform_handshake(sockfd, 47, "Techn0manCZ");
     (void) ret;
 
-    while(true) {
+
+    for(int i = 0; i < 1; i++) {
 
         // read packet
         unionstream_t stream;
@@ -59,6 +67,21 @@ int main(int argc, char *argv[]) {
 
         stream_free(&stream);
     }
+    enc_socket_t *enc_sock = enc_socket_init(sockfd);
+    if(enc_sock == NULL) {
+        return 1;
+    }
+    uint8_t buff[21];
+    enc_socket_read(enc_sock, buff, 20);
+    // recv(sockfd, buff, 20, MSG_WAITALL);
+
+    for(size_t i = 0; i < 20; i++) {
+        printf("%c", buff[i]);
+    }
+    printf("\n");
+
+    // info("main", "%s\n", buff);
+    return 1;
 
     return 1;
 }
