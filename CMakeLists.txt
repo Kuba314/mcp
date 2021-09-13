@@ -49,13 +49,9 @@ set(SOURCE_FILES
     src/connection.c
     src/unionstream.c
     src/sockbuff.c
-    src/packet_stream.c
     src/packet_handler.c
     ${PACKET_FILES}
     ${HANDLER_FILES}
-    src/crypto/encrypt_auth_pair.c
-    src/crypto/enc_socket.c
-    src/crypto/packet_encryption.c
 )
 
 # # add test files and link them

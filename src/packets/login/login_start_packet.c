@@ -1,7 +1,7 @@
 #include <string.h>
 
-#include "sockbuff.h"
 #include "unionstream.h"
+#include "sockbuff.h"
 
 int send_LoginStart(unionstream_t *stream, const char *username) {
     size_t name_length = strlen(username);

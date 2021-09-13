@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
 
 typedef struct {
     uint8_t *s;

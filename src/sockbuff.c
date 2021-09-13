@@ -1,6 +1,5 @@
 #include "sockbuff.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -34,22 +33,29 @@ sockbuff_t *sockbuff_create() {
     return buff;
 }
 
-int sockbuff_write(sockbuff_t *buff, const void *src, size_t length) {
-    size_t new_length = buff->length + length;
-    while(new_length > buff->alloc_length) {
+static int _modify_for_size_increase(sockbuff_t *buff, size_t length)
+{
+    while(buff->length + length > buff->alloc_length) {
         buff->alloc_length *= 2;
         void *tmp = realloc(buff->data, buff->alloc_length);
         if(tmp == NULL) {
-            perror("sockbuff_write");
+            alloc_error();
             sockbuff_free(buff);
             return 1;
         }
 
         buff->data = tmp;
     }
+    return 0;
+}
+
+int sockbuff_write(sockbuff_t *buff, const void *src, size_t length) {
+    if(_modify_for_size_increase(buff, length)) {
+        return 1;
+    }
 
     memcpy(buff->data + buff->length, src, length);
-    buff->length = new_length;
+    buff->length += length;
     return 0;
 }
 

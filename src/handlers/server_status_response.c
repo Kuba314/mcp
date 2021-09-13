@@ -2,7 +2,7 @@
 
 #include "unionstream.h"
 
-void on_server_status_response(unionstream_t *stream) {
+int on_server_status_response(unionstream_t *stream) {
 
     fprintf(stderr, "got server status response:\n\t");
     unsigned char c;
@@ -11,4 +11,5 @@ void on_server_status_response(unionstream_t *stream) {
         printf("%c", c);
     }
     printf("\n");
+    return 0;
 }

@@ -20,3 +20,5 @@ BraceWrapping:
     AfterFunction: true
 IndentExternBlock: Indent
 IndentPPDirectives: BeforeHash
+BreakBeforeBraces: Custom
+SortIncludes: false

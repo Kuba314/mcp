@@ -1,12 +1,11 @@
 #include "connection.h"
 
-#include <arpa/inet.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
-int connect_to_server(const char *ip, uint16_t port) {
-
+int connect_to_server(const char *ip, uint16_t port)
+{
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0) {
         perror("connect_to_server: socket creation");
