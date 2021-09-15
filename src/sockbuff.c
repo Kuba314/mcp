@@ -64,12 +64,12 @@ extern int sockbuff_write_short(sockbuff_t *buff, uint16_t value);
 extern int sockbuff_write_string(sockbuff_t *buff, const char *src,
                                  size_t length);
 int sockbuff_write_varint(sockbuff_t *buff, int32_t value) {
-    uint8_t bytes[5];
+    char bytes[5];
     size_t n_bytes = format_varint(bytes, value);
     return sockbuff_write(buff, bytes, n_bytes);
 }
 int sockbuff_write_varlong(sockbuff_t *buff, int64_t value) {
-    uint8_t bytes[10];
+    char bytes[10];
     size_t n_bytes = format_varlong(bytes, value);
     return sockbuff_write(buff, bytes, n_bytes);
 }

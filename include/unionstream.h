@@ -9,7 +9,7 @@
 typedef struct {
     int sockfd;
 
-    uint8_t *data;
+    char *data;
     size_t length;
     size_t offset;
 
@@ -22,10 +22,10 @@ typedef struct {
 
 int stream_load_packet(unionstream_t *stream);
 
-int stream_read(unionstream_t *stream, uint8_t *dst, size_t size);
+int stream_read(unionstream_t *stream, void *dst, size_t size);
 int stream_read_varint(unionstream_t *stream, int32_t *value);
-int stream_read_string(unionstream_t *stream, string_t *str);
+string_t *stream_read_string(unionstream_t *stream);
 
-int stream_write_packet(unionstream_t *stream, const uint8_t *buff,
+int stream_write_packet(unionstream_t *stream, const char *buff,
                         size_t length);
 void stream_free(unionstream_t *stream);

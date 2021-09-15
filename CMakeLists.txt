@@ -40,6 +40,7 @@ include(GoogleTest)
 
 find_package(ZLIB)
 find_package(OpenSSL)
+find_package(CURL)
 
 file(GLOB_RECURSE PACKET_FILES src/packets/*.c)
 file(GLOB_RECURSE HANDLER_FILES src/handlers/*.c)
@@ -50,6 +51,8 @@ set(SOURCE_FILES
     src/unionstream.c
     src/sockbuff.c
     src/packet_handler.c
+    src/auth/mojang_auth.c
+    src/utils.c
     ${PACKET_FILES}
     ${HANDLER_FILES}
 )
@@ -67,4 +70,4 @@ add_executable(main
     src/main.c
     ${SOURCE_FILES}
 )
-target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL)
+target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl)

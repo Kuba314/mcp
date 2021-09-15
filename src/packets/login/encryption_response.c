@@ -1,11 +1,11 @@
 #include "unionstream.h"
 #include "sockbuff.h"
+#include "packets.h"
 
 int send_EncryptionResponse(unionstream_t *stream, size_t secret_length,
                             const char *secret, size_t token_length,
                             const char *token)
 {
-
     sockbuff_t *buff = sockbuff_create();
     if(buff == 0) {
         return 1;

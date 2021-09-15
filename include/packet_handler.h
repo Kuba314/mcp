@@ -12,7 +12,7 @@ typedef enum
     CONN_STATE_PLAY,
 } conn_state_t;
 
-extern conn_state_t connection_state;
+extern conn_state_t g_connection_state;
 
 int handle_packet(int32_t packet_id, unionstream_t *stream);
 

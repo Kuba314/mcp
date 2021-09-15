@@ -1,11 +1,9 @@
-#include <string.h>
-
 #include "unionstream.h"
 #include "sockbuff.h"
+#include "packets.h"
 
-int send_LoginStart(unionstream_t *stream, const char *username) {
-    size_t name_length = strlen(username);
-
+int send_LoginStart(unionstream_t *stream, const char *username, size_t username_length)
+{
     sockbuff_t *buff = sockbuff_create();
     if(buff == 0) {
         return 1;
@@ -13,7 +11,7 @@ int send_LoginStart(unionstream_t *stream, const char *username) {
 
     int err = 0;
     err |= sockbuff_write_byte(buff, 0);
-    err |= sockbuff_write_string(buff, username, name_length);
+    err |= sockbuff_write_string(buff, username, username_length);
     if(err) {
         return err;
     }

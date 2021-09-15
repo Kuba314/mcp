@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "packet_handler.h"
@@ -7,22 +8,14 @@
 #include "packets.h"
 #include "debug.h"
 
+#include "auth.h"
+
 #define HYPIXEL_IP "172.65.234.205"
 #define LOCALHOST "127.0.0.1"
 
-int perform_handshake(unionstream_t *stream, int32_t proto_version,
-                      const char *username)
-{
-    (void) username;
 
-    send_Handshake(stream, proto_version, 2);
-    // send_StatusRequest(sockfd);
-    send_LoginStart(stream, username);
-
-    // auth
-
-    return 0;
-}
+char *g_player_username = "username";
+char *g_player_password = "password";
 
 int main(int argc, char *argv[])
 {
@@ -37,10 +30,10 @@ int main(int argc, char *argv[])
 
     unionstream_t stream = {
         .sockfd = sockfd,
-
     };
-    int ret = perform_handshake(&stream, 47, "Techn0manCZ");
-    (void) ret;
+    send_Handshake(&stream, 47, 2);
+    // send_StatusRequest(stream);
+    send_LoginStart(&stream, "Techn0manCZ", strlen("Techn0manCZ"));
 
     int err = 0;
     while(true) {

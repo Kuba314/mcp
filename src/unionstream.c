@@ -11,6 +11,8 @@
 #include "debug.h"
 #include "varint.h"
 
+int g_compression_threshold = 0;
+
 int stream_read_varint(unionstream_t *stream, int32_t *value)
 {
     uint8_t n_read;
@@ -21,31 +23,29 @@ int stream_read_varint(unionstream_t *stream, int32_t *value)
     return 0;
 }
 
-int stream_read_string(unionstream_t *stream, string_t *str)
+string_t *stream_read_string(unionstream_t *stream)
 {
     int32_t length;
     uint8_t n_read;
     if(read_varint(stream->data + stream->offset, &length, &n_read)) {
-        return 1;
+        return NULL;
     }
     stream->offset += n_read;
 
     if(length < 0) {
-        return 1;
-    } else if(length == 0) {
-        *str = (string_t){ 0 };
-    } else {
-        str->s = malloc(length);
-        if(str->s == NULL) {
-            alloc_error();
-            return 1;
-        }
-        str->length = length;
-        if(stream_read(stream, str->s, length)) {
-            return 1;
-        }
+        return NULL;
     }
-    return 0;
+
+    string_t *string = string_alloc(length);
+    if(string == NULL) {
+        alloc_error();
+        return NULL;
+    }
+
+    if(stream_read(stream, string->s, length)) {
+        return NULL;
+    }
+    return string;
 }
 
 void stream_free(unionstream_t *stream)
@@ -61,28 +61,8 @@ void stream_free(unionstream_t *stream)
     }
 }
 
-// static int _stream_write_enc(unionstream_t *stream, const uint8_t *buff,
-// size_t length) {
 
-//     uint8_t *enc_buff = malloc(length);
-//     if(enc_buff == NULL) {
-//         error("alloc", "enc_socket_write");
-//         return 1;
-//     }
-
-//     int out_length;
-//     if(!EVP_EncryptUpdate(stream->en_ctx, enc_buff, &out_length, buff,
-//     length)) {
-//         ERR_print_errors_fp(stderr);
-//         return 1;
-//     }
-//     verbose("enc_socket_enc", "out_length %d", out_length);
-//     send(stream->sockfd, enc_buff, length, 0);
-
-//     return 0;
-// }
-
-int stream_read(unionstream_t *stream, uint8_t *dst, size_t length)
+int stream_read(unionstream_t *stream, void *dst, size_t length)
 {
     if(length <= 0) {
         return 0;
@@ -99,7 +79,7 @@ int stream_read(unionstream_t *stream, uint8_t *dst, size_t length)
     stream->offset += length;
     return 0;
 }
-int stream_write_packet(unionstream_t *stream, const uint8_t *buff,
+int stream_write_packet(unionstream_t *stream, const char *buff,
                         size_t length)
 {
     // if(length >= stream->compression_threshold) {
@@ -107,8 +87,8 @@ int stream_write_packet(unionstream_t *stream, const uint8_t *buff,
     // }
 
     if(stream->is_encrypted) {
-        uint8_t *encrypted = malloc(length);
-        if(!EVP_EncryptUpdate(stream->en_ctx, encrypted, NULL, buff, length)) {
+        char *encrypted = malloc(length);
+        if(!EVP_EncryptUpdate(stream->en_ctx, (uint8_t *) encrypted, NULL, (uint8_t *) buff, length)) {
             ERR_print_errors_fp(stderr);
             return 1;
         }
@@ -116,15 +96,15 @@ int stream_write_packet(unionstream_t *stream, const uint8_t *buff,
     }
 
     // send packet length
-    uint8_t varint_bytes[5];
+    char varint_bytes[5];
     uint8_t n_bytes = format_varint(varint_bytes, length);
 
     verbose_begin("sockbuff", "sending \"");
     for(size_t i = 0; i < n_bytes; i++) {
-        verbose_frag("\\x%02x", varint_bytes[i]);
+        verbose_frag("\\x%02x", (uint8_t) varint_bytes[i]);
     }
     for(size_t i = 0; i < length; i++) {
-        verbose_frag("\\x%02x", buff[i]);
+        verbose_frag("\\x%02x", (uint8_t) buff[i]);
     }
     verbose_frag("\"");
     verbose_end();
@@ -145,14 +125,15 @@ int stream_load_packet(unionstream_t *stream)
     // varint crypto-enabled function?)
 #define N_PRELOADED 5
     // read first 5 bytes (varint max)
-    uint8_t buff_varint[N_PRELOADED];
+    // TODO: FIX THIS SO THAT VARINT IS ABLE TO DECRYPT THE STREAM PLEASEE, CAN'T LOGIN, DOESN'T WORK
+    char buff_varint[N_PRELOADED];
     ssize_t _err = recv(stream->sockfd, buff_varint, N_PRELOADED, 0);
     if(_err < 0) {
         perror("stream_load_packet: pre-recv");
         printf("%ld\n", _err);
         return 1;
     } else if(_err != N_PRELOADED) {
-        error("load_packet", "disconnected");
+        error("load_packet", "disconnected (%ld bytes read)", _err);
         return 1;
     }
 
@@ -161,7 +142,7 @@ int stream_load_packet(unionstream_t *stream)
         uint8_t buff_varint_dec[N_PRELOADED];
         int outlen;
         if(!EVP_DecryptUpdate(stream->de_ctx, buff_varint_dec, &outlen,
-                              buff_varint, N_PRELOADED)) {
+                              (uint8_t *) buff_varint, N_PRELOADED)) {
             ERR_print_errors_fp(stderr);
             return 1;
         }
@@ -176,13 +157,13 @@ int stream_load_packet(unionstream_t *stream)
     }
     uint8_t overread_bytes = N_PRELOADED - n_read;
 
-    // check packet length
-    if(packet_length <= 3) {
-        error("load_packet", "Invalid packet length: %d\n", packet_length);
-        return 1;
-    }
+    // // check packet length
+    // if(packet_length <= 3) {
+    //     error("load_packet", "Invalid packet length: %d\n", packet_length);
+    //     return 1;
+    // }
 
-    uint8_t *packet_data = malloc(packet_length);
+    char *packet_data = malloc(packet_length);
     if(packet_data == NULL) {
         alloc_error();
         return 1;
@@ -199,7 +180,7 @@ int stream_load_packet(unionstream_t *stream)
     }
 
     if(stream->is_encrypted) {
-        uint8_t *decrypted = malloc(packet_length);
+        char *decrypted = malloc(packet_length);
         if(decrypted == NULL) {
             alloc_error();
             return 1;
@@ -207,8 +188,8 @@ int stream_load_packet(unionstream_t *stream)
         memcpy(decrypted, buff_varint + n_read, overread_bytes);
 
         int outlen;
-        if(!EVP_DecryptUpdate(stream->de_ctx, decrypted + overread_bytes,
-                              &outlen, packet_data + overread_bytes,
+        if(!EVP_DecryptUpdate(stream->de_ctx, (uint8_t *) decrypted + overread_bytes,
+                              &outlen, (uint8_t *) packet_data + overread_bytes,
                               packet_length - overread_bytes)) {
             ERR_print_errors_fp(stderr);
             return 1;
@@ -243,7 +224,7 @@ int stream_load_packet(unionstream_t *stream)
             return 1;
         }
 
-        uint8_t *decompressed = malloc(data_length);
+        char *decompressed = malloc(data_length);
         if(decompressed == NULL) {
             alloc_error();
             return 1;

@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 typedef struct {
-    uint8_t *data;
+    char *data;
     size_t length;
     size_t alloc_length;
 } sockbuff_t;

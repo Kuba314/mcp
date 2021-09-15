@@ -18,7 +18,7 @@ IncludeCategories:
     Priority:        2
 BraceWrapping:
     AfterFunction: true
-IndentExternBlock: Indent
+IndentExternBlock: true
 IndentPPDirectives: BeforeHash
 BreakBeforeBraces: Custom
 SortIncludes: false

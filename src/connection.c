@@ -1,8 +1,14 @@
 #include "connection.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <openssl/sha.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "debug.h"
 
 int connect_to_server(const char *ip, uint16_t port)
 {
