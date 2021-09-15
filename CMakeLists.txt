@@ -13,16 +13,16 @@ set(CMAKE_C_FLAGS "-Werror -Wall -Wextra -pedantic")
 # add include/ directory
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# fetch gtest
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/955c7f837efad184ec63e771c42542d37545eaef.zip
-)
-FetchContent_MakeAvailable(googletest)
-enable_testing()
+# # fetch gtest
+# include(FetchContent)
+# FetchContent_Declare(
+#     googletest
+#     URL https://github.com/google/googletest/archive/955c7f837efad184ec63e771c42542d37545eaef.zip
+# )
+# FetchContent_MakeAvailable(googletest)
+# enable_testing()
 
-include(GoogleTest)
+# include(GoogleTest)
 
 # # add coverage target
 # if(CMAKE_COMPILER_IS_GNUCXX)

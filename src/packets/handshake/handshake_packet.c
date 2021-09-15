@@ -1,9 +1,8 @@
-#include "packet_handler.h"
-#include "unionstream.h"
-#include "sockbuff.h"
 #include "packets.h"
+#include "packet_handler.h"
 
-int send_Handshake(unionstream_t *stream, int32_t proto_version, uint8_t next_state) {
+int send_Handshake(unionstream_t *stream, int32_t proto_version, uint8_t next_state)
+{
     sockbuff_t *buff = sockbuff_create();
     if(buff == NULL) {
         return 1;

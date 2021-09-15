@@ -9,6 +9,6 @@ int on_keep_alive(unionstream_t *stream)
         return 1;
     }
 
-    send_Keep_alive(stream, keep_alive_id);
+    send_KeepAlive(stream, keep_alive_id);
     return 0;
 }

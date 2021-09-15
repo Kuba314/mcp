@@ -1,5 +1,3 @@
-#include "unionstream.h"
-#include "sockbuff.h"
 #include "packets.h"
 
 int send_LoginStart(unionstream_t *stream, const char *username, size_t username_length)

@@ -23,5 +23,5 @@ void string_free(string_t *string);
 void print_string(string_t *string);
 void print_string_hex(string_t *string);
 
-void print_string_c(const char *str, size_t length);
-void print_string_c_hex(const char *str, size_t length);
+void print_bytes(const void *ptr, size_t length);
+void print_bytes_hex(const void *ptr, size_t length);

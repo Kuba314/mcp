@@ -17,19 +17,19 @@ int on_join_game(unionstream_t *stream)
         return 1;
     }
     uint8_t gamemode;
-    if(stream_read_byte(stream, &gamemode)) {
+    if(stream_read_ubyte(stream, &gamemode)) {
         return 1;
     }
-    uint8_t dimension;
+    int8_t dimension;
     if(stream_read_byte(stream, &dimension)) {
         return 1;
     }
     uint8_t difficulty;
-    if(stream_read_byte(stream, &difficulty)) {
+    if(stream_read_ubyte(stream, &difficulty)) {
         return 1;
     }
     uint8_t max_players;
-    if(stream_read_byte(stream, &max_players)) {
+    if(stream_read_ubyte(stream, &max_players)) {
         return 1;
     }
     string_t *level_type = stream_read_string(stream);
@@ -37,10 +37,11 @@ int on_join_game(unionstream_t *stream)
         return 1;
     }
     bool reduced_debug_info;
-    if(stream_read_byte(stream, (uint8_t *) &reduced_debug_info)) {
+    if(stream_read_bool(stream, &reduced_debug_info)) {
         return 1;
     }
 
     debug("join_game", "eid(0x%x) gm(%u) dim(%d) diff(%u) maxpl(%u) lvlt(%s) rdbgi(%u)", entity_id, gamemode, dimension, difficulty, max_players, level_type->s, reduced_debug_info);
+    string_free(level_type);
     return 0;
 }

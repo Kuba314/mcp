@@ -2,7 +2,7 @@
 
 int on_player_abilities(unionstream_t *stream)
 {
-    uint8_t flags;
+    int8_t flags;
     if(stream_read_byte(stream, &flags)) {
         return 1;
     }

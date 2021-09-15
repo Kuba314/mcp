@@ -9,11 +9,13 @@
 #include "_string.h"
 #include "debug.h"
 
-char int2hex(char c) {
+char int2hex(char c)
+{
     return c + ((c < 10) ? '0': 'a' - 10);
 }
 
-uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length) {
+uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
+{
 
     // negative hash and null byte
     uint8_t *hash_hex = malloc(length * 2 + 2);
@@ -115,7 +117,7 @@ int extract_json_string_pair(const char *buff, size_t buff_len, const char *key_
     char *token = strnstr(buff, key_with_quotes, buff_len);
     if(token == NULL) {
         error_begin("json", "key %s not found in ", key_with_quotes);
-        print_string_c(buff, buff_len);
+        print_bytes(buff, buff_len);
         error_end();
         return 1;
     }
@@ -128,7 +130,7 @@ int extract_json_string_pair(const char *buff, size_t buff_len, const char *key_
     int offset = find_closing_quote(token, buff_len - (token - buff));
     if(offset == -1) {
         error_begin("json", "malformed json string: ");
-        print_string_c(buff, buff_len);
+        print_bytes(buff, buff_len);
         error_end();
         return 1;
     }

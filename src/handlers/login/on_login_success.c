@@ -1,6 +1,7 @@
 #include "unionstream.h"
 #include "_string.h"
 #include "debug.h"
+#include <string.h>
 
 #include "packet_handler.h"
 

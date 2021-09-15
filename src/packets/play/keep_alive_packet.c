@@ -1,8 +1,6 @@
 #include "packets.h"
-#include "sockbuff.h"
-#include "unionstream.h"
 
-int send_Keep_alive(unionstream_t *stream, int64_t keep_alive_id)
+int send_KeepAlive(unionstream_t *stream, int32_t keep_alive_id)
 {
     sockbuff_t *buff = sockbuff_create();
     if(buff == NULL) {

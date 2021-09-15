@@ -41,29 +41,32 @@ stringview_t stringview_from_string(string_t *string)
     return (stringview_t) {.s = string->s, .length = string->length};
 }
 
-void string_free(string_t *string) {
+void string_free(string_t *string)
+{
     if(string->s != NULL) {
         free(string->s);
     }
     free(string);
 }
 
-void print_string(string_t *string) {
-    print_string_c(string->s, string->length);
+void print_string(string_t *string)
+{
+    print_bytes(string->s, string->length);
 }
-void print_string_hex(string_t *string) {
-    print_string_c_hex(string->s, string->length);
+void print_string_hex(string_t *string)
+{
+    print_bytes_hex(string->s, string->length);
 }
 
-void print_string_c(const char *str, size_t length)
+void print_bytes(const void *str, size_t length)
 {
     for(size_t i = 0; i < length; i++) {
-        fprintf(stderr, "%c", (unsigned char) str[i]);
+        fprintf(stderr, "%c", ((uint8_t *) str)[i]);
     }
 }
-void print_string_c_hex(const char *str, size_t length)
+void print_bytes_hex(const void *str, size_t length)
 {
     for(size_t i = 0; i < length; i++) {
-        fprintf(stderr, "\\x%02x", (unsigned char) str[i]);
+        fprintf(stderr, "\\x%02x", ((uint8_t *) str)[i]);
     }
 }

@@ -3,7 +3,7 @@
 int on_server_difficulty(unionstream_t *stream)
 {
     uint8_t difficulty;
-    if(stream_read_byte(stream, &difficulty)) {
+    if(stream_read_ubyte(stream, &difficulty)) {
         return 1;
     }
 

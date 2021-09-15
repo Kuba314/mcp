@@ -1,5 +1,3 @@
-#include "unionstream.h"
-#include "sockbuff.h"
 #include "packets.h"
 
 int send_StatusRequest(unionstream_t *stream)

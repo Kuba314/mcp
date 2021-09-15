@@ -1,7 +1,4 @@
 #include "packets.h"
-#include "unionstream.h"
-#include "sockbuff.h"
-#include "_string.h"
 
 int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *token)
 {
