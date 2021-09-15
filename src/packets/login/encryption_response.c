@@ -1,20 +1,19 @@
+#include "packets.h"
 #include "unionstream.h"
 #include "sockbuff.h"
-#include "packets.h"
+#include "_string.h"
 
-int send_EncryptionResponse(unionstream_t *stream, size_t secret_length,
-                            const char *secret, size_t token_length,
-                            const char *token)
+int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *token)
 {
     sockbuff_t *buff = sockbuff_create();
-    if(buff == 0) {
+    if(buff == NULL) {
         return 1;
     }
 
     int err = 0;
     err |= sockbuff_write_varint(buff, 1);
-    err |= sockbuff_write_string(buff, secret, secret_length);
-    err |= sockbuff_write_string(buff, token, token_length);
+    err |= sockbuff_write_string(buff, secret);
+    err |= sockbuff_write_string(buff, token);
     if(err) {
         return err;
     }

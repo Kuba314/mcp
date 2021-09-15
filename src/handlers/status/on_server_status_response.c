@@ -1,6 +1,4 @@
-#include "unionstream.h"
-#include "_string.h"
-#include "debug.h"
+#include "packet_handler.h"
 
 int on_server_status_response(unionstream_t *stream)
 {

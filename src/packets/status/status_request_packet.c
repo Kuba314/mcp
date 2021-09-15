@@ -5,7 +5,7 @@
 int send_StatusRequest(unionstream_t *stream)
 {
     sockbuff_t *buff = sockbuff_create();
-    if(buff == 0) {
+    if(buff == NULL) {
         return 1;
     }
 

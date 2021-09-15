@@ -1,15 +1,14 @@
+#include "packet_handler.h"
+#include "packets.h"
+
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/x509.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "auth.h"
 
-#include "unionstream.h"
-#include "connection.h"
-#include "packets.h"
-#include "_string.h"
-#include "debug.h"
 
 unsigned char g_aes_key[16];
 unsigned char g_aes_iv[16];
@@ -127,8 +126,7 @@ int on_encryption_request(unionstream_t *stream)
     }
 
     // send rsa encrypted data back to server
-    if(send_EncryptionResponse(stream, enc_aes_key->length, enc_aes_key->s,
-                               enc_token->length, enc_token->s)) {
+    if(send_EncryptionResponse(stream, enc_aes_key, enc_token)) {
         return 1;
     }
 

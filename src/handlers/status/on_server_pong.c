@@ -1,5 +1,4 @@
-#include "unionstream.h"
-#include "debug.h"
+#include "packet_handler.h"
 
 int on_server_pong(unionstream_t *stream)
 {

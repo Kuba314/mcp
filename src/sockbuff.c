@@ -61,8 +61,9 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length) {
 
 extern int sockbuff_write_byte(sockbuff_t *buff, uint8_t byte);
 extern int sockbuff_write_short(sockbuff_t *buff, uint16_t value);
-extern int sockbuff_write_string(sockbuff_t *buff, const char *src,
+extern int sockbuff_write_c_string(sockbuff_t *buff, const char *src,
                                  size_t length);
+extern int sockbuff_write_string(sockbuff_t *buff, string_t *string);
 int sockbuff_write_varint(sockbuff_t *buff, int32_t value) {
     char bytes[5];
     size_t n_bytes = format_varint(bytes, value);

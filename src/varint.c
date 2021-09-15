@@ -14,7 +14,6 @@ int read_varint(const char *buff, int32_t *result, uint8_t *n_read)
     uint32_t uresult = 0;
     uint8_t n_read_tmp = 0;
 
-    verbose_begin("varint", "reading: ");
     do {
         if(bit_offset == 35) {
             error("read_varint", "VarInt is too big (%d so far)\n", uresult);
@@ -23,7 +22,6 @@ int read_varint(const char *buff, int32_t *result, uint8_t *n_read)
 
         curr_byte = buff[n_read_tmp++];
 
-        verbose_frag("\\x%02x", curr_byte);
         uresult |= (curr_byte & 0x7f) << bit_offset;
 
         bit_offset += 7;
@@ -33,8 +31,6 @@ int read_varint(const char *buff, int32_t *result, uint8_t *n_read)
     if(n_read != NULL) {
         *n_read = n_read_tmp;
     }
-    verbose_frag(" = %d", *result);
-    verbose_end();
     return 0;
 }
 
@@ -46,7 +42,6 @@ int read_varlong(const char *buff, int64_t *result, uint8_t *n_read)
     uint64_t uresult = 0;
     uint8_t n_read_tmp = 0;
 
-    verbose_begin("varlong", "reading: ");
     do {
         if(bit_offset == 70) {
             error("read_varint", "VarLong is too big (%ld so far)\n", uresult);
@@ -55,7 +50,6 @@ int read_varlong(const char *buff, int64_t *result, uint8_t *n_read)
 
         curr_byte = buff[n_read_tmp++];
 
-        verbose_frag("\\x%02x", curr_byte);
         uresult |= (curr_byte & 0x7f) << bit_offset;
 
         bit_offset += 7;
@@ -65,8 +59,6 @@ int read_varlong(const char *buff, int64_t *result, uint8_t *n_read)
     if(n_read != NULL) {
         *n_read = n_read_tmp;
     }
-    verbose_frag(" = %ld", *result);
-    verbose_end();
     return 0;
 }
 

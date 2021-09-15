@@ -13,6 +13,7 @@ int send_StatusRequest(unionstream_t *stream);
 
 // login
 int send_LoginStart(unionstream_t *stream, const char *username, size_t username_length);
-int send_EncryptionResponse(unionstream_t *stream, size_t secret_length,
-                            const char *secret, size_t token_length,
-                            const char *token);
+int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *token);
+
+// play
+int send_Keep_alive(unionstream_t *stream, int64_t keep_alive_id);
