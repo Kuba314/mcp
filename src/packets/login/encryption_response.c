@@ -1,6 +1,6 @@
 #include "packets.h"
 
-int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *token)
+int send_EncryptionResponse(unionstream_t *stream, string_t *enc_aes_key, string_t *enc_verify_token)
 {
     sockbuff_t *buff = sockbuff_create();
     if(buff == NULL) {
@@ -9,8 +9,8 @@ int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *t
 
     int err = 0;
     err |= sockbuff_write_varint(buff, 1);
-    err |= sockbuff_write_string(buff, secret);
-    err |= sockbuff_write_string(buff, token);
+    err |= sockbuff_write_string(buff, enc_aes_key);
+    err |= sockbuff_write_string(buff, enc_verify_token);
     if(err) {
         return err;
     }

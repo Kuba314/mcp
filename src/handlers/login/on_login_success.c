@@ -17,10 +17,7 @@ int on_login_success(unionstream_t *stream)
         return 1;
     }
 
-    debug("dbg", "%s", username->s);
-    debug("dbg", "%s", uuid->s);
-
-    info("login", "success: %s (%s)", username->s, uuid->s);
+    info("login", "Successfully logged in as: %s (%s)", username->s, uuid->s);
     g_connection_state = 3;
 
     string_free(username);

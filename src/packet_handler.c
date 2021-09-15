@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include "config.h"
 #include "debug.h"
 
 // packet handlers
@@ -19,7 +20,7 @@ static int (*const login_packet_handlers[])(unionstream_t *) = {
 static int (*const play_packet_handlers[])(unionstream_t *) = {
     [0x00] = on_keep_alive,
     [0x01] = on_join_game,
-    // [0x02] = on_chat_message,
+    [0x02] = on_chat_message,
     // [0x03] = on_time_update,
     // [0x04] = on_entity_equipment,
     [0x05] = on_spawn_position,
@@ -103,7 +104,6 @@ static char *get_conn_state_name()
 }
 
 conn_state_t g_connection_state = CONN_STATE_HANDSHAKE;
-
 int handle_packet(int32_t packet_id, unionstream_t *stream)
 {
     static int (*const *all_packet_handlers[])(unionstream_t *) = {
@@ -128,14 +128,16 @@ int handle_packet(int32_t packet_id, unionstream_t *stream)
         }
     }
 
-    warning_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(), packet_id);
-    if(stream->length < 256) {
-        warning_frag("dumping: ");
-        print_bytes_hex(stream->data + stream->offset, stream->length - stream->offset);
-    } else {
-        warning_frag("not dumping, too large (%ld)", stream->length - stream->offset);
+    if(g_verbosity >= 3) {
+        warning_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(), packet_id);
+        if(stream->length < 256) {
+            warning_frag("dumping: ");
+            print_bytes_hex(stream->data + stream->offset, stream->length - stream->offset);
+        } else {
+            warning_frag("not dumping, too large (%ld)", stream->length - stream->offset);
+        }
+        warning_end();
     }
-    warning_end();
 
     return 0;
 }

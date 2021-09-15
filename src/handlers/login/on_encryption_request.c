@@ -9,18 +9,15 @@
 #include <stdbool.h>
 #include "auth.h"
 
-
 unsigned char g_aes_key[16];
 unsigned char g_aes_iv[16];
 
-// encrypt aes_key and enc_token with server's rsa public key
-static int auth_create_encrypted_pair(string_t *pubkey, string_t *auth_token,
-                                      string_t **enc_aes_key,
-                                      string_t **enc_token)
+// encrypt aes_key and enc_verify_token with server's rsa public key
+static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token, string_t **enc_aes_key,
+                                      string_t **enc_verify_token)
 {
     void *pubkey_buff_tmp = pubkey->s;
-    EVP_PKEY *evp_key =
-        d2i_PUBKEY(NULL, (const unsigned char **) &pubkey->s, pubkey->length);
+    EVP_PKEY *evp_key = d2i_PUBKEY(NULL, (const unsigned char **) &pubkey->s, pubkey->length);
     if(evp_key == NULL) {
         ERR_print_errors_fp(stderr);
         return 1;
@@ -45,18 +42,17 @@ static int auth_create_encrypted_pair(string_t *pubkey, string_t *auth_token,
     if(*enc_aes_key == NULL) {
         return 1;
     }
-    RSA_public_encrypt(16, g_aes_key, (uint8_t *) (*enc_aes_key)->s, rsa,
-                       RSA_PKCS1_PADDING);
+    RSA_public_encrypt(16, g_aes_key, (uint8_t *) (*enc_aes_key)->s, rsa, RSA_PKCS1_PADDING);
     verbose("auth", "secret encrypted");
 
     // encrypt token
-    *enc_token = string_alloc(128);
-    if(*enc_token == NULL) {
-        perror("enc_token string allocation");
+    *enc_verify_token = string_alloc(128);
+    if(*enc_verify_token == NULL) {
+        perror("enc_verify_token string allocation");
         return 1;
     }
-    RSA_public_encrypt(auth_token->length, (uint8_t *) auth_token->s,
-                       (uint8_t *) (*enc_token)->s, rsa, RSA_PKCS1_PADDING);
+    RSA_public_encrypt(verify_token->length, (uint8_t *) verify_token->s, (uint8_t *) (*enc_verify_token)->s, rsa,
+                       RSA_PKCS1_PADDING);
     verbose("auth", "verify token encrypted");
 
     RSA_free(rsa);
@@ -72,8 +68,7 @@ static int init_stream_for_encryption(unionstream_t *stream)
         ERR_print_errors_fp(stderr);
         return 1;
     }
-    if(!EVP_EncryptInit(stream->en_ctx, EVP_aes_128_cfb8(), g_aes_key,
-                        g_aes_iv)) {
+    if(!EVP_EncryptInit(stream->en_ctx, EVP_aes_128_cfb8(), g_aes_key, g_aes_iv)) {
         ERR_print_errors_fp(stderr);
         EVP_CIPHER_CTX_cleanup(stream->en_ctx);
         return 1;
@@ -86,8 +81,7 @@ static int init_stream_for_encryption(unionstream_t *stream)
         ERR_print_errors_fp(stderr);
         return 1;
     }
-    if(!EVP_DecryptInit(stream->de_ctx, EVP_aes_128_cfb8(), g_aes_key,
-                        g_aes_iv)) {
+    if(!EVP_DecryptInit(stream->de_ctx, EVP_aes_128_cfb8(), g_aes_key, g_aes_iv)) {
         EVP_CIPHER_CTX_cleanup(stream->en_ctx);
         EVP_CIPHER_CTX_cleanup(stream->de_ctx);
         ERR_print_errors_fp(stderr);
@@ -105,28 +99,39 @@ int on_encryption_request(unionstream_t *stream)
     if(server_id == NULL)
         return 1;
 
+    verbose_begin("server_id", "");
+    verbose_bytes(server_id->s, server_id->length);
+    verbose_end();
+
     string_t *pubkey = stream_read_string(stream);
     if(pubkey == NULL)
         return 1;
 
+    verbose_begin("pubkey", "");
+    verbose_bytes(pubkey->s, pubkey->length);
+    verbose_end();
+
     string_t *verify_token = stream_read_string(stream);
     if(verify_token == NULL)
         return 1;
+
+    verbose_begin("verify_token", "");
+    verbose_bytes(verify_token->s, verify_token->length);
+    verbose_end();
+
+    string_t *enc_aes_key;
+    string_t *enc_verify_token;
+    if(auth_create_encrypted_pair(pubkey, verify_token, &enc_aes_key, &enc_verify_token)) {
+        return 1;
+    }
 
     // auth with mojang api
     if(authenticate_with_mojang(server_id, pubkey)) {
         return 1;
     }
 
-    string_t *enc_aes_key;
-    string_t *enc_token;
-    if(auth_create_encrypted_pair(pubkey, verify_token, &enc_aes_key,
-                                  &enc_token)) {
-        return 1;
-    }
-
     // send rsa encrypted data back to server
-    if(send_EncryptionResponse(stream, enc_aes_key, enc_token)) {
+    if(send_EncryptionResponse(stream, enc_aes_key, enc_verify_token)) {
         return 1;
     }
 
@@ -139,6 +144,6 @@ int on_encryption_request(unionstream_t *stream)
     string_free(pubkey);
     string_free(verify_token);
     string_free(enc_aes_key);
-    string_free(enc_token);
+    string_free(enc_verify_token);
     return 0;
 }

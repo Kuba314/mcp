@@ -150,6 +150,11 @@ int stream_load_packet(unionstream_t *stream)
 }
 int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
 {
+    verbose_begin("stream", "sending \"");
+    verbose_bytes(buff, length);
+    verbose_frag("\"");
+    verbose_end();
+
     // copy data to own buffer
     void *src = malloc(length);
     if(src == NULL) {
@@ -157,15 +162,16 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         return 1;
     }
 
-    // compress to src if needed, else just memcpy
     uint8_t *after_compression;
     size_t after_compression_length;
 
+    // will have to prepend decompressed data size
     if(stream->is_compressed) {
         size_t compressed_length;
         uint8_t data_len_varint[5];
         uint8_t data_len_nbytes;
 
+        // only compress if length is over threshold
         if(length >= g_compression_threshold) {
             z_stream defstream;
             defstream.zalloc = Z_NULL;
@@ -189,11 +195,11 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
             memcpy(src, buff, length);
         }
 
-
         uint8_t pkt_len_varint[5];
         uint8_t pkt_len_nbytes = format_varint(pkt_len_varint, compressed_length + data_len_nbytes);
 
-        after_compression_length = compressed_length + pkt_len_nbytes + data_len_nbytes;
+        // memcpy everything neatly into a new buffer
+        after_compression_length = pkt_len_nbytes + data_len_nbytes + compressed_length;
         after_compression = malloc(after_compression_length);
         if(after_compression == NULL) {
             alloc_error();
@@ -207,7 +213,7 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         uint8_t pkt_len_varint[5];
         uint8_t pkt_len_nbytes = format_varint(pkt_len_varint, length);
 
-        after_compression_length = length + pkt_len_nbytes;
+        after_compression_length = pkt_len_nbytes + length;
         after_compression = malloc(after_compression_length);
         if(after_compression == NULL) {
             alloc_error();
@@ -220,24 +226,22 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
 
     uint8_t *after_encryption = after_compression;
     size_t after_encryption_length = after_compression_length;
-    if(stream->is_encrypted) {
-        after_encryption = malloc(length);
 
-        // just ignore this
+    // pass data through AES if the stream is encrypted
+    if(stream->is_encrypted) {
+        after_encryption = malloc(after_compression_length);
+        if(after_encryption == NULL) {
+            alloc_error();
+            return 1;
+        }
+
         int outlen;
-        if(!EVP_EncryptUpdate(stream->en_ctx, after_encryption, &outlen, after_compression, length)) {
+        if(!EVP_EncryptUpdate(stream->en_ctx, after_encryption, &outlen, after_compression, after_compression_length)) {
             ERR_print_errors_fp(stderr);
             return 1;
         }
         free(after_compression);
     }
-
-    verbose_begin("sockbuff", "sending \"");
-    for(size_t i = 0; i < after_encryption_length; i++) {
-        verbose_frag("\\x%02x", ((uint8_t *) after_encryption)[i]);
-    }
-    verbose_frag("\"");
-    verbose_end();
 
     send(stream->sockfd, after_encryption, after_encryption_length, 0);
     free(after_encryption);
@@ -344,7 +348,6 @@ int stream_read_rev(unionstream_t *stream, void *dst, size_t length)
     return 0;
 }
 
-
 extern int stream_read_bool(unionstream_t *stream, bool *value);
 extern int stream_read_byte(unionstream_t *stream, int8_t *value);
 extern int stream_read_short(unionstream_t *stream, int16_t *value);
@@ -355,7 +358,6 @@ extern int stream_read_ubyte(unionstream_t *stream, uint8_t *value);
 extern int stream_read_ushort(unionstream_t *stream, uint16_t *value);
 extern int stream_read_float(unionstream_t *stream, float *value);
 extern int stream_read_double(unionstream_t *stream, double *value);
-
 
 string_t *stream_read_string(unionstream_t *stream)
 {

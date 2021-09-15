@@ -26,19 +26,19 @@ uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
 
     // space out the chars, count zeros
     int n_zeros = 0;
-    int nonzero_found = 0;
+    bool nonzero_found = false;
     for(size_t i = 0; i < length; i++) {
         hash_hex[i * 2]     = hash[i] >> 4;
         hash_hex[i * 2 + 1] = hash[i] & 0xf;
 
-        if(hash_hex[i * 2] == 0 && nonzero_found) {
+        if(hash_hex[i * 2] == 0 && !nonzero_found) {
             n_zeros++;
             if(hash_hex[i * 2 + 1] == 0) {
                 n_zeros++;
                 continue;
             }
         }
-        nonzero_found = 1;
+        nonzero_found = true;
     }
 
     int sign = hash[0] >> 7;
