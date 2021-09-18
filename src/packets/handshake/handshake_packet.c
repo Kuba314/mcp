@@ -11,8 +11,7 @@ int send_Handshake(unionstream_t *stream, int32_t proto_version, uint8_t next_st
     int err = 0;
     err |= sockbuff_write_byte(buff, 0);
     err |= sockbuff_write_varint(buff, proto_version);
-    // err |= sockbuff_write_c_string(buff, "mc.hypixel.net", 14);
-    err |= sockbuff_write_c_string(buff, "", 0);
+    err |= sockbuff_write_c_string(buff, "mc.hypixel.net", 14);
     err |= sockbuff_write_short(buff, 25565);
     err |= sockbuff_write_byte(buff, next_state);
     if(err) {

@@ -19,3 +19,4 @@ int send_EncryptionResponse(unionstream_t *stream, string_t *secret, string_t *t
 
 // play
 int send_KeepAlive(unionstream_t *stream, int32_t keep_alive_id);
+int send_ChatMessage(unionstream_t *stream, const char *message, size_t message_len);

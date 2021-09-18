@@ -20,6 +20,12 @@ unionstream_t *stream_create(int sockfd)
         return NULL;
     }
 
+    if(sem_init(&stream->lock, 0, 1)) {
+        perror("sem_init");
+        free(stream);
+        return NULL;
+    }
+
     stream->sockfd = sockfd;
     return stream;
 }
@@ -150,6 +156,8 @@ int stream_load_packet(unionstream_t *stream)
 }
 int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
 {
+    sem_wait(&stream->lock);
+
     verbose_begin("stream", "sending \"");
     verbose_bytes(buff, length);
     verbose_frag("\"");
@@ -159,6 +167,7 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
     void *src = malloc(length);
     if(src == NULL) {
         alloc_error();
+        sem_post(&stream->lock);
         return 1;
     }
 
@@ -203,6 +212,7 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         after_compression = malloc(after_compression_length);
         if(after_compression == NULL) {
             alloc_error();
+            sem_post(&stream->lock);
             return 1;
         }
         memcpy(after_compression, pkt_len_varint, pkt_len_nbytes);
@@ -217,6 +227,7 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         after_compression = malloc(after_compression_length);
         if(after_compression == NULL) {
             alloc_error();
+            sem_post(&stream->lock);
             return 1;
         }
         memcpy(after_compression, pkt_len_varint, pkt_len_nbytes);
@@ -232,12 +243,14 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         after_encryption = malloc(after_compression_length);
         if(after_encryption == NULL) {
             alloc_error();
+            sem_post(&stream->lock);
             return 1;
         }
 
         int outlen;
         if(!EVP_EncryptUpdate(stream->en_ctx, after_encryption, &outlen, after_compression, after_compression_length)) {
             ERR_print_errors_fp(stderr);
+            sem_post(&stream->lock);
             return 1;
         }
         free(after_compression);
@@ -245,6 +258,7 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
 
     send(stream->sockfd, after_encryption, after_encryption_length, 0);
     free(after_encryption);
+    sem_post(&stream->lock);
     return 0;
 }
 

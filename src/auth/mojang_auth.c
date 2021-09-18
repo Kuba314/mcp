@@ -176,7 +176,7 @@ int authenticate_with_mojang(string_t *server_id, string_t *pubkey)
     string_t *client_token;
     string_t *access_token;
     string_t *uuid;
-    if(mojang_authenticate(g_mojang_username, g_mojang_password, &client_token, &access_token, &uuid)) {
+    if(mojang_authenticate(g_login, g_password, &client_token, &access_token, &uuid)) {
         return 1;
     }
     if(mojang_join(client_token, access_token, uuid, server_id_hash)) {

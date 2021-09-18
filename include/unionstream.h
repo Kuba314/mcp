@@ -3,12 +3,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <openssl/evp.h>
+#include <semaphore.h>
 
 #include "position.h"
 #include "_string.h"
 
 typedef struct {
     int sockfd;
+    sem_t lock;
 
     uint8_t *data;
     size_t length;

@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <signal.h>
 
 #include "packet_handler.h"
 #include "unionstream.h"
 #include "connection.h"
 #include "packets.h"
+#include "world.h"
 #include "debug.h"
 
 #include "config.h"
@@ -14,7 +17,58 @@
 #define HYPIXEL_IP "172.65.234.205"
 #define LOCALHOST "127.0.0.1"
 
+#define VERSION_ID_1_8_9 47
 
+static bool running = true;
+
+void *run_main_loop(void *stream)
+{
+    while(running) {
+
+        // load packet into memory
+        if(stream_load_packet(stream)) {
+            break;
+        }
+
+        // read packet id
+        int32_t packet_id;
+        if(stream_read_varint(stream, &packet_id)) {
+            break;
+        }
+
+        if(handle_packet(packet_id, stream)) {
+            break;
+        }
+
+        stream_free_data(stream);
+    }
+    debug("thread", "handler exit");
+    return NULL;
+}
+
+void run_console(unionstream_t *stream)
+{
+    (void) stream;
+    while(running) {
+        char buff[1024];
+        if(fgets(buff, 1024, stdin) == 0) {
+            debug("console", "probably ctrl c");
+            return;
+        }
+        if(strncmp(buff, "exit", 4) == 0) {
+            running = false;
+            return;
+        } else if(strncmp(buff, "?", 1) == 0) {
+            debug("console", "sending chat message");
+            send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
+        }
+    }
+}
+void on_interrupt(int signum)
+{
+    (void) signum;
+    running = false;
+}
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +88,9 @@ int main(int argc, char *argv[])
             }
             config_filename = argv[i + 1];
             i++;
+        } else if(i >= 1) {
+            error("args", "invalid option: \"%s\"", argv[i]);
+            return 1;
         }
     }
     if(config_filename == NULL) {
@@ -44,6 +101,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    if(world_init()) {
+        return 1;
+    }
+
     // int sockfd = connect_to_server(HYPIXEL_IP, 25565);
     int sockfd = connect_to_server(LOCALHOST, 25565);
     if(sockfd < 0) {
@@ -51,37 +112,18 @@ int main(int argc, char *argv[])
     }
 
     unionstream_t *stream = stream_create(sockfd);
-    send_Handshake(stream, 47, 2);
-    // send_StatusRequest(stream);
+    send_Handshake(stream, VERSION_ID_1_8_9, 2);
     send_LoginStart(stream, g_username, strlen(g_username));
 
-    int err = 0;
-    while(true) {
+    pthread_t thread;
+    pthread_create(&thread, NULL, run_main_loop, stream);
 
-        // load packet into memory
-        if(stream_load_packet(stream)) {
-            err = 1;
-            break;
-        }
+    signal(SIGINT, on_interrupt);
+    run_console(stream);
 
-        // read packet id
-        int32_t packet_id;
-        if(stream_read_varint(stream, &packet_id)) {
-            err = 1;
-            break;
-        }
+    pthread_join(thread, NULL);
 
-        if(handle_packet(packet_id, stream)) {
-            err = 1;
-            break;
-        }
-
-        stream_free_data(stream);
-    }
     stream_free(stream);
     free_config();
-    if(err) {
-        return err;
-    }
-    return 1;
+    return 0;
 }

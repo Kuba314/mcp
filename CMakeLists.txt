@@ -47,6 +47,9 @@ file(GLOB_RECURSE HANDLER_FILES src/handlers/*.c)
 set(SOURCE_FILES
     src/varint.c
     src/string.c
+    src/world.c
+    src/hashmap.c
+    src/tablist.c
     src/connection.c
     src/unionstream.c
     src/sockbuff.c
@@ -64,11 +67,11 @@ add_executable(${PROJECT_TEST_NAME}
     ${TEST_FILES}
     ${SOURCE_FILES}
 )
-target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl)
+target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread)
 gtest_discover_tests(${PROJECT_TEST_NAME})
 
 add_executable(main
     src/main.c
     ${SOURCE_FILES}
 )
-target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl)
+target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread)
