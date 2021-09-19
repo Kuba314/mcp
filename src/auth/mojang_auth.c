@@ -68,21 +68,27 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
     }
     verbose_end();
 
-    if(extract_json_string_pair(data->data, data->length, "\"clientToken\"", client_token)) {
+    json_value *parsed = json_parse(data->data, data->length);
+    if(parsed == NULL || parsed->type != json_object) {
+        error("json", "invalid response type");
+        return 1;
+    }
+    if(json_extract_string(parsed, client_token, "clientToken", NULL)) {
         return 1;
     }
     verbose("auth", "extracted clientToken: \"%s\"", (*client_token)->s);
 
-    if(extract_json_string_pair(data->data, data->length, "\"accessToken\"", access_token)) {
+    if(json_extract_string(parsed, access_token, "accessToken", NULL)) {
         return 1;
     }
     verbose("auth", "extracted accessToken: \"%s\"", (*access_token)->s);
 
-    if(extract_json_string_pair(data->data, data->length, "\"id\"", uuid)) {
+    if(json_extract_string(parsed, uuid, "selectedProfile", "id", NULL)) {
         return 1;
     }
     verbose("auth", "extracted player uuid: \"%s\"", (*uuid)->s);
 
+    json_value_free(parsed);
     sockbuff_free(data);
     return 0;
 }
@@ -182,6 +188,7 @@ int authenticate_with_mojang(string_t *server_id, string_t *pubkey)
     if(mojang_join(client_token, access_token, uuid, server_id_hash)) {
         return 1;
     }
+    string_free(server_id_hash);
     string_free(client_token);
     string_free(access_token);
     string_free(uuid);

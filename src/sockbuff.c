@@ -36,9 +36,9 @@ void sockbuff_free(sockbuff_t *buff)
 
 int sockbuff_write(sockbuff_t *buff, const void *src, size_t length)
 {
-    while(buff->length + length > buff->alloc_length) {
+    while(buff->length + length + 1 > buff->alloc_length) {
         buff->alloc_length *= 2;
-        void *tmp = realloc(buff->data, buff->alloc_length);
+        void *tmp = realloc(buff->data, buff->alloc_length + 1);
         if(tmp == NULL) {
             alloc_error();
             sockbuff_free(buff);
@@ -50,6 +50,7 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length)
 
     memcpy(buff->data + buff->length, src, length);
     buff->length += length;
+    buff->data[buff->length] = '\0';        // null byte cuz why not
     return 0;
 }
 

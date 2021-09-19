@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // int sockfd = connect_to_server(HYPIXEL_IP, 25565);
-    int sockfd = connect_to_server(LOCALHOST, 25565);
+    int sockfd = connect_to_server(HYPIXEL_IP, 25565);
+    // int sockfd = connect_to_server(LOCALHOST, 25565);
     if(sockfd < 0) {
         return 1;
     }

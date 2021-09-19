@@ -57,6 +57,7 @@ set(SOURCE_FILES
     src/auth/mojang_auth.c
     src/utils.c
     src/config.c
+    src/json.c
     ${PACKET_FILES}
     ${HANDLER_FILES}
 )
@@ -67,11 +68,11 @@ add_executable(${PROJECT_TEST_NAME}
     ${TEST_FILES}
     ${SOURCE_FILES}
 )
-target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread)
+target_link_libraries(${PROJECT_TEST_NAME} gtest_main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread m)
 gtest_discover_tests(${PROJECT_TEST_NAME})
 
 add_executable(main
     src/main.c
     ${SOURCE_FILES}
 )
-target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread)
+target_link_libraries(main ZLIB::ZLIB OpenSSL::SSL CURL::libcurl pthread m)

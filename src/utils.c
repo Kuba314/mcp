@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 #include "_string.h"
 #include "debug.h"
@@ -79,62 +80,47 @@ size_t bufwrite(void *ptr, size_t size, size_t nmemb, sockbuff_t *buff)
     return size*nmemb;
 }
 
-// https://stackoverflow.com/questions/23999797/implementing-strnstr
-char *strnstr(const char *haystack, const char *needle, size_t len)
+int json_extract_string(json_value *json, string_t **dest, ...)
 {
-    size_t needle_len = strnlen(needle, len);
+    va_list args;
+    va_start(args, dest);
 
-    if(needle_len == 0) {
-        return (char *) haystack;
-    }
-
-    for(size_t i = 0; i <= len - needle_len; i++) {
-        if(*haystack == *needle && strncmp(haystack, needle, needle_len) == 0) {
-            return (char *) haystack;
+    json_value *obj = json;
+    const char *curr = va_arg(args, const char *);
+    bool found_key;
+    while(curr != NULL) {
+        if(obj->type != json_object) {
+            error("json", "not an object");
+            va_end(args);
+            return 1;
         }
-        haystack++;
-    }
-    return NULL;
-}
-int find_closing_quote(const char *str, size_t length)
-{
-    bool escaped = false;
-    str++;
 
-    for(size_t i = 0; i < length; i++) {
-        if(escaped) {
-            continue;
-        } else if(str[i] == '\\') {
-            escaped = true;
-        } else if(str[i] == '"') {
-            return i;
+        found_key = false;
+        for(uint32_t i = 0; i < obj->u.object.length; i++) {
+            json_object_entry entry = obj->u.object.values[i];
+
+            if(strncmp(entry.name, curr, entry.name_length) == 0) {
+                obj = entry.value;
+                curr = va_arg(args, const char *);
+                found_key = true;
+                break;
+            }
+        }
+        if(!found_key) {
+            error("json", "key %s not found in object", curr);
+            va_end(args);
+            return 1;
         }
     }
-    return -1;
-}
-int extract_json_string_pair(const char *buff, size_t buff_len, const char *key_with_quotes, string_t **value)
-{
-    char *token = strnstr(buff, key_with_quotes, buff_len);
-    if(token == NULL) {
-        error_begin("json", "key %s not found in ", key_with_quotes);
-        print_bytes(buff, buff_len);
-        error_end();
+    va_end(args);
+
+    if(obj->type != json_string) {
+        error("json", "json type is not a string");
         return 1;
     }
-
-    // skip whitespace and a colon
-    token += strlen(key_with_quotes);
-    while(isspace(*token) || *token == ':') {
-        token++;
-    }
-    int offset = find_closing_quote(token, buff_len - (token - buff));
-    if(offset == -1) {
-        error_begin("json", "malformed json string: ");
-        print_bytes(buff, buff_len);
-        error_end();
+    *dest = string_create(obj->u.string.ptr, obj->u.string.length);
+    if(*dest == NULL) {
         return 1;
     }
-
-    *value = string_create(token + 1, offset);
     return 0;
 }

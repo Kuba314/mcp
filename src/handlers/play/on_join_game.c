@@ -41,7 +41,7 @@ int on_join_game(unionstream_t *stream)
         return 1;
     }
 
-    debug("join_game", "eid(0x%x) gm(%u) dim(%d) diff(%u) maxpl(%u) lvlt(%s) rdbgi(%u)", entity_id, gamemode, dimension, difficulty, max_players, level_type->s, reduced_debug_info);
+    debug("join_game", "eid(0x%x) gm(%u) dim(%d) diff(%u) maxpl(%u) lvlt(%s) redudeceddbgi(%u)", entity_id, gamemode, dimension, difficulty, max_players, level_type->s, reduced_debug_info);
     string_free(level_type);
     return 0;
 }

@@ -1,3 +1,4 @@
 *.o
 build/
 *.cfg
+plan.yml
