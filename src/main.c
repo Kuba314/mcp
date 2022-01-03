@@ -43,6 +43,7 @@ void *run_main_loop(void *stream)
         stream_free_data(stream);
     }
     debug("thread", "handler exit");
+    running = false;
     return NULL;
 }
 
