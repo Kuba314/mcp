@@ -1,10 +1,52 @@
 #include "packet_handler.h"
 
 #include <string.h>
+#include <stdint.h>
 
 #include "sockbuff.h"
 #include "json.h"
 
+static const char *get_color_prefix_from_ssign(char c)
+{
+    static const char *colors[] = {
+        "\033[0;30m",
+        "\033[0;34m",
+        "\033[0;32m",
+        "\033[0;36m",
+        "\033[0;31m",
+        "\033[0;35m",
+        "\033[0;33m",
+        "\033[0;37m",
+        "\033[1;30m",
+        "\033[1;34m",
+        "\033[1;32m",
+        "\033[1;36m",
+        "\033[1;31m",
+        "\033[1;35m",
+        "\033[1;33m",
+        "\033[1;37m",
+    };
+    if(c >= 'a' && c <= 'f') {
+        c = c - 'a' + 10;
+    } else if(c >= '0' && c <= '9') {
+        c -= '0';
+    } else if(c == 'k') {   // obfuscated
+        return "\033[5m";
+    } else if(c == 'l') {   // bold
+        return "\033[1m";
+    } else if(c == 'm') {   // strikethrough
+        return "\033[9m";
+    } else if(c == 'n') {   // underline
+        return "\033[4m";
+    } else if(c == 'o') {   // italic
+        return "\033[3m";
+    } else if(c == 'r') {   // reset
+        return "\033[0m";
+    } else {
+        return "";
+    }
+    return colors[(uint8_t) c];
+}
 
 static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
 {
@@ -40,6 +82,8 @@ static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
         } else if(strncmp(entry.name, "color", entry.name_length) == 0) {
             color.s = entry.value->u.string.ptr;
             color.length = entry.value->u.string.length;
+        } else {
+            debug("json_key", "%s", entry.name);
         }
     }
 
@@ -62,7 +106,19 @@ static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
         }
     }
     if(text.s != NULL) {
-        sockbuff_write(buff, text.s, text.length);
+        bool escaped = false;
+        for(uint32_t i = 0; i < text.length; i++) {
+            if(escaped) {
+                const char *clr_prefix = get_color_prefix_from_ssign(text.s[i]);
+                sockbuff_write(buff, clr_prefix, strlen(clr_prefix));
+                escaped = false;
+            } else if(strncmp(text.s + i, "§", 2) == 0) {
+                escaped = true;
+                i++;    // skip second § char
+            } else {
+                sockbuff_write(buff, &text.s[i], 1);
+            }
+        }
     }
     sockbuff_write(buff, "\033(B\033[m", strlen("\033(B\033[m"));
     return 0;
