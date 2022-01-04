@@ -66,7 +66,7 @@ int load_config(const char *filename)
 
     bool missing_option = false;
     for(size_t i = 0; i < sizeof(options) / sizeof(*options); i++) {
-        if(options[i].dest == NULL) {
+        if(*options[i].dest == NULL) {
             error("config", "option \"%s\" not set", options[i].key);
             missing_option = true;
         }
