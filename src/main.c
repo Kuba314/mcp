@@ -112,7 +112,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    unionstream_t *stream = stream_create(sockfd);
+    unionstream_t *stream;
+    if(stream_create(sockfd, &stream)) {
+        return 1;
+    }
     send_Handshake(stream, VERSION_ID_1_8_9, 2);
     send_LoginStart(stream, g_username, strlen(g_username));
 

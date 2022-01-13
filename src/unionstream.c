@@ -12,22 +12,22 @@
 
 size_t g_compression_threshold = 0;
 
-unionstream_t *stream_create(int sockfd)
+int stream_create(int sockfd, unionstream_t **stream)
 {
-    unionstream_t *stream = calloc(1, sizeof(unionstream_t));
-    if(stream == NULL) {
+    *stream = calloc(1, sizeof(unionstream_t));
+    if(*stream == NULL) {
         alloc_error();
-        return NULL;
+        return 1;
     }
 
-    if(sem_init(&stream->lock, 0, 1)) {
+    if(sem_init(&(*stream)->lock, 0, 1)) {
         perror("sem_init");
         free(stream);
-        return NULL;
+        return 1;
     }
 
-    stream->sockfd = sockfd;
-    return stream;
+    (*stream)->sockfd = sockfd;
+    return 0;
 }
 void stream_free_data(unionstream_t *stream)
 {
@@ -78,7 +78,7 @@ int stream_load_packet(unionstream_t *stream)
         perror("stream_load_packet: recv");
         return 1;
     } else if(err != packet_length) {
-        warning("load_packet", "Didn't read enough, proceeding");
+        warn("load_packet", "Didn't read enough, proceeding");
         packet_length = err;
     }
 

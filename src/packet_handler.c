@@ -128,15 +128,15 @@ int handle_packet(int32_t packet_id, unionstream_t *stream)
         }
     }
 
-    if(g_verbosity >= 3) {
-        warning_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(), packet_id);
+    if(g_verbosity >= DBG_WARN) {
+        warn_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(), packet_id);
         if(stream->length < 256) {
-            warning_frag("dumping: ");
+            warn_frag("dumping: ");
             print_bytes_hex(stream->data + stream->offset, stream->length - stream->offset);
         } else {
-            warning_frag("not dumping, too large (%ld)", stream->length - stream->offset);
+            warn_frag("not dumping, too large (%ld)", stream->length - stream->offset);
         }
-        warning_end();
+        warn_end();
     }
 
     return 0;

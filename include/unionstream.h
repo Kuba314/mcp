@@ -23,7 +23,7 @@ typedef struct {
     bool is_encrypted;
 } unionstream_t;
 
-unionstream_t *stream_create(int sockfd);
+int stream_create(int sockfd, unionstream_t **stream);
 void stream_print_rest(unionstream_t *stream);
 void stream_free_data(unionstream_t *stream);
 void stream_free(unionstream_t *stream);
