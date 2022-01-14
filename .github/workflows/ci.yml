@@ -1,0 +1,40 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install clang-format
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main'
+          sudo apt-get install -y clang-format-13
+
+      - name: Run clang-format
+        run: ./check_format.sh
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install gtest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libgtest-dev cmake ninja-build
+
+      - name: Create build folder
+        run: mkdir build
+
+      - name: Run cmake
+        run: cmake -B build -GNinja
+
+      - name: Build
+        run: ninja -C build
+
+      - name: Run tests
+        run: ninja -C build test

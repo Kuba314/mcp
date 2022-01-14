@@ -4,7 +4,6 @@
 
 #include "debug.h"
 
-
 int tablist_add_player(tablist_t *tablist, const char *uuid, char *name, int32_t gamemode,
                        int32_t ping, char *displayname)
 {
@@ -14,7 +13,8 @@ int tablist_add_player(tablist_t *tablist, const char *uuid, char *name, int32_t
     list_item->gamemode = gamemode;
     list_item->ping = ping;
     list_item->displayname = displayname;
-    debug("tablist", "add player %s gm(%d) ping(%d) dispname(%s)", name, gamemode, ping, (displayname == NULL) ? "(nil)" : displayname);
+    debug("tablist", "add player %s gm(%d) ping(%d) dispname(%s)", name, gamemode, ping,
+          (displayname == NULL) ? "(nil)" : displayname);
     return hashmap_put(tablist, uuid, list_item);
 }
 int tablist_remove_player(tablist_t *tablist, char *uuid)

@@ -1,14 +1,15 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-    #include <stdlib.h>
-    #include <openssl/sha.h>
+#include <stdlib.h>
+#include <openssl/sha.h>
 
-    #include "_string.h"
-    #include "utils.h"
+#include "_string.h"
+#include "utils.h"
 }
 
-TEST(Hashes, Notch) {
+TEST(Hashes, Notch)
+{
     unsigned char hash[SHA_DIGEST_LENGTH];
 
     SHA_CTX ctx;
@@ -26,7 +27,8 @@ TEST(Hashes, Notch) {
     EXPECT_EQ(strcmp((char *) hash_hex, expected_hash), 0);
     free(hash_hex);
 }
-TEST(Hashes, jeb_) {
+TEST(Hashes, jeb_)
+{
     unsigned char hash[SHA_DIGEST_LENGTH];
 
     SHA_CTX ctx;
@@ -44,7 +46,8 @@ TEST(Hashes, jeb_) {
     EXPECT_EQ(strcmp((char *) hash_hex, expected_hash), 0);
     free(hash_hex);
 }
-TEST(Hashes, simon) {
+TEST(Hashes, simon)
+{
     unsigned char hash[SHA_DIGEST_LENGTH];
 
     SHA_CTX ctx;

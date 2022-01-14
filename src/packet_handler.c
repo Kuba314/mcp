@@ -82,7 +82,7 @@ static int (*const play_packet_handlers[])(unionstream_t *) = {
     // [0x3d] = on_display_scoreboard,
     // [0x3e] = on_teams,
     [0x3f] = on_plugin_message,
-    [0x40] = on_login_disconnect,   // should be custom handler but w/e
+    [0x40] = on_login_disconnect, // should be custom handler but w/e
     [0x41] = on_server_difficulty,
     // [0x42] = on_combat_event,
     // [0x43] = on_camera,
@@ -129,7 +129,8 @@ int handle_packet(int32_t packet_id, unionstream_t *stream)
     }
 
     if(g_verbosity >= DBG_WARN) {
-        warn_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(), packet_id);
+        warn_begin("packet_handler", "missing packet handler \"%s\", id 0x%02x, ",
+                   get_conn_state_name(), packet_id);
         if(stream->length < 256) {
             warn_frag("dumping: ");
             print_bytes_hex(stream->data + stream->offset, stream->length - stream->offset);

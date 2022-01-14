@@ -21,9 +21,9 @@ struct config_option {
 };
 
 static const struct config_option options[] = {
-    { "login", &g_login },
-    { "password", &g_password },
-    { "username", &g_username },
+    {"login",     &g_login   },
+    { "password", &g_password},
+    { "username", &g_username},
 };
 int load_config(const char *filename)
 {

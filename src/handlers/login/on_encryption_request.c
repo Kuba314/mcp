@@ -13,8 +13,8 @@ unsigned char g_aes_key[16];
 unsigned char g_aes_iv[16];
 
 // encrypt aes_key and enc_verify_token with server's rsa public key
-static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token, string_t **enc_aes_key,
-                                      string_t **enc_verify_token)
+static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token,
+                                      string_t **enc_aes_key, string_t **enc_verify_token)
 {
     void *pubkey_buff_tmp = pubkey->s;
     EVP_PKEY *evp_key = d2i_PUBKEY(NULL, (const unsigned char **) &pubkey->s, pubkey->length);
@@ -51,8 +51,8 @@ static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token, 
         perror("enc_verify_token string allocation");
         return 1;
     }
-    RSA_public_encrypt(verify_token->length, (uint8_t *) verify_token->s, (uint8_t *) (*enc_verify_token)->s, rsa,
-                       RSA_PKCS1_PADDING);
+    RSA_public_encrypt(verify_token->length, (uint8_t *) verify_token->s,
+                       (uint8_t *) (*enc_verify_token)->s, rsa, RSA_PKCS1_PADDING);
     verbose("auth", "verify token encrypted");
 
     RSA_free(rsa);

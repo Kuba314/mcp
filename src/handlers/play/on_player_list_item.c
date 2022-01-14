@@ -84,7 +84,8 @@ int on_player_list_item(unionstream_t *stream)
                 }
             }
 
-            if(tablist_add_player(world->tablist, uuid, name->s, gamemode, ping, (displayname == NULL) ? NULL : displayname->s))
+            if(tablist_add_player(world->tablist, uuid, name->s, gamemode, ping,
+                                  (displayname == NULL) ? NULL : displayname->s))
                 return 1;
 
             string_free(name);

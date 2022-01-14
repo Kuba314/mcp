@@ -15,7 +15,8 @@ static void skip_whitespace(char **ptr)
 
 static json_value_t *_json_parse_number(const char *str, char **endptr)
 {
-    enum {
+    enum
+    {
         STATE_SIGN,
         STATE_DIGIT,
         STATE_DECIMAL_DOT,
@@ -93,8 +94,7 @@ static json_value_t *_json_parse_number(const char *str, char **endptr)
     case STATE_EXPONENT_EMPTY:
         error("json", "number ended in a wrong state (%d)", state);
         return NULL;
-    default:
-        break;
+    default: break;
     }
 
     json_value_t *ret = malloc(sizeof(json_value_t));
@@ -153,12 +153,11 @@ static json_value_t *_json_parse_object(const char *str, char **endptr)
     while(true) {
         if(isspace(*str)) {
             continue;
-        } else if(*str == )
+        } else if(*str ==)
     }
 }
 static json_value_t *_json_parse_list(const char *str, char **endptr)
 {
-
 }
 static json_value_t *_json_parse_keyword(const char *str, char **endptr)
 {
@@ -239,8 +238,7 @@ void json_free(json_value_t *json)
         }
         break;
     }
-    default:
-        break;
+    default: break;
     }
     free(json);
 }

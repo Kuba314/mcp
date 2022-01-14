@@ -34,11 +34,11 @@ string_t *string_create(const char *str, size_t size)
 }
 stringview_t stringview_create(const char *str, size_t length)
 {
-    return (stringview_t) {.s = str, .length = length};
+    return (stringview_t){ .s = str, .length = length };
 }
 stringview_t stringview_from_string(string_t *string)
 {
-    return (stringview_t) {.s = string->s, .length = string->length};
+    return (stringview_t){ .s = string->s, .length = string->length };
 }
 
 void string_free(string_t *string)

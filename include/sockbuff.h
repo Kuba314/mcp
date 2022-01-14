@@ -31,8 +31,7 @@ inline int sockbuff_write_short(sockbuff_t *buff, uint16_t value)
     int err = sockbuff_write_byte(buff, value >> 8);
     return err || sockbuff_write_byte(buff, value & 0xff);
 }
-inline int sockbuff_write_c_string(sockbuff_t *buff, const char *src,
-                                 size_t length)
+inline int sockbuff_write_c_string(sockbuff_t *buff, const char *src, size_t length)
 {
     int ret = sockbuff_write_varint(buff, length);
     return ret || sockbuff_write(buff, src, length);

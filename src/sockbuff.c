@@ -50,7 +50,7 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length)
 
     memcpy(buff->data + buff->length, src, length);
     buff->length += length;
-    buff->data[buff->length] = '\0';        // null byte cuz why not
+    buff->data[buff->length] = '\0'; // null byte cuz why not
     return 0;
 }
 

@@ -7,8 +7,7 @@
 #include "_string.h"
 
 // handshake
-int send_Handshake(unionstream_t *stream, int32_t proto_version,
-                   uint8_t next_state);
+int send_Handshake(unionstream_t *stream, int32_t proto_version, uint8_t next_state);
 
 // status
 int send_StatusRequest(unionstream_t *stream);

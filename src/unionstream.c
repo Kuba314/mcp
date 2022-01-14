@@ -248,7 +248,8 @@ int stream_write_packet(unionstream_t *stream, const void *buff, size_t length)
         }
 
         int outlen;
-        if(!EVP_EncryptUpdate(stream->en_ctx, after_encryption, &outlen, after_compression, after_compression_length)) {
+        if(!EVP_EncryptUpdate(stream->en_ctx, after_encryption, &outlen, after_compression,
+                              after_compression_length)) {
             ERR_print_errors_fp(stderr);
             sem_post(&stream->lock);
             return 1;

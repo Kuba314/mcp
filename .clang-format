@@ -9,6 +9,7 @@ MaxEmptyLinesToKeep: 1
 BreakBeforeBraces: Custom
 BraceWrapping:
     AfterFunction: true
+    AfterEnum: true
 IndentExternBlock: true
 
 # spaces
@@ -23,6 +24,7 @@ AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
+AlignArrayOfStructures: Left
 
 # preprocessor stuff
 IncludeBlocks: Regroup

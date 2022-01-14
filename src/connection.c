@@ -18,8 +18,7 @@ int connect_to_server(const char *ip, uint16_t port)
         return sockfd;
     }
 
-    struct sockaddr_in serv_addr = { .sin_family = AF_INET,
-                                     .sin_port = htons(port) };
+    struct sockaddr_in serv_addr = { .sin_family = AF_INET, .sin_port = htons(port) };
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if(inet_pton(AF_INET, ip, &serv_addr.sin_addr) != 1) {

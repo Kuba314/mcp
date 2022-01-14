@@ -1,6 +1,7 @@
 #include "packets.h"
 
-int send_EncryptionResponse(unionstream_t *stream, string_t *enc_aes_key, string_t *enc_verify_token)
+int send_EncryptionResponse(unionstream_t *stream, string_t *enc_aes_key,
+                            string_t *enc_verify_token)
 {
     sockbuff_t *buff = sockbuff_create();
     if(buff == NULL) {

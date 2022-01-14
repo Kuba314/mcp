@@ -131,8 +131,8 @@ void json_value_free(json_value *);
 void json_value_free_ex(json_settings *settings, json_value *);
 
 #define JSON_LIST_FOREACH(json_list, json_iter)                                                    \
-    for(int i = 0, struct _json_object_entry json_iter = *json_iter = json_list->head; json_iter->next != NULL;               \
-        json_iter = json_iter->next)
+    for(int i = 0, struct _json_object_entry json_iter = *json_iter = json_list->head;             \
+        json_iter->next != NULL; json_iter = json_iter->next)
 
 #define JSON_OBJECT_FOREACH(json_object, json_iter)                                                \
     for(struct json_object_node *json_iter = json_object->head; json_iter->next != NULL;           \

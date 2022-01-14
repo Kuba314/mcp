@@ -12,7 +12,7 @@
 
 char int2hex(char c)
 {
-    return c + ((c < 10) ? '0': 'a' - 10);
+    return c + ((c < 10) ? '0' : 'a' - 10);
 }
 
 uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
@@ -29,7 +29,7 @@ uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
     int n_zeros = 0;
     bool nonzero_found = false;
     for(size_t i = 0; i < length; i++) {
-        hash_hex[i * 2]     = hash[i] >> 4;
+        hash_hex[i * 2] = hash[i] >> 4;
         hash_hex[i * 2 + 1] = hash[i] & 0xf;
 
         if(hash_hex[i * 2] == 0 && !nonzero_found) {
@@ -65,7 +65,7 @@ uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
     }
 
     // convert to readable format
-    for(int i = sign; i < (int) length * 2 + sign- n_zeros; i++) {
+    for(int i = sign; i < (int) length * 2 + sign - n_zeros; i++) {
         hash_hex[i] = int2hex(hash_hex[i]);
     }
 
@@ -77,7 +77,7 @@ uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
 size_t bufwrite(void *ptr, size_t size, size_t nmemb, sockbuff_t *buff)
 {
     sockbuff_write(buff, ptr, size * nmemb);
-    return size*nmemb;
+    return size * nmemb;
 }
 
 int json_extract_string(json_value *json, string_t **dest, ...)

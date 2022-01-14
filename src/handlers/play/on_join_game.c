@@ -2,12 +2,13 @@
 
 /*
 Entity ID           Int             The player's Entity ID (EID)
-Gamemode            Unsigned Byte   0: Survival, 1: Creative, 2: Adventure, 3: Spectator. Bit 3 (0x8) is the hardcore flag.
+Gamemode            Unsigned Byte
+    0: Survival, 1: Creative, 2: Adventure, 3: Spectator. Bit 3 (0x8) is the hardcore flag.
 Dimension           Byte            -1: Nether, 0: Overworld, 1: End
 Difficulty          Unsigned Byte   0: peaceful, 1: easy, 2: normal, 3: hard
 Max Players         Unsigned Byte   Used by the client to draw the player list
 Level Type          String          default, flat, largeBiomes, amplified, default_1_1
-Reduced Debug Info  Boolean         If true, a Notchian client shows reduced information on the debug screen.
+Reduced Debug Info  Boolean         show reduced debug info screen
 */
 
 int on_join_game(unionstream_t *stream)
@@ -41,7 +42,9 @@ int on_join_game(unionstream_t *stream)
         return 1;
     }
 
-    debug("join_game", "eid(0x%x) gm(%u) dim(%d) diff(%u) maxpl(%u) lvlt(%s) redudeceddbgi(%u)", entity_id, gamemode, dimension, difficulty, max_players, level_type->s, reduced_debug_info);
+    debug("join_game", "eid(0x%x) gm(%u) dim(%d) diff(%u) maxpl(%u) lvlt(%s) redudeceddbgi(%u)",
+          entity_id, gamemode, dimension, difficulty, max_players, level_type->s,
+          reduced_debug_info);
     string_free(level_type);
     return 0;
 }

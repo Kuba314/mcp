@@ -18,8 +18,8 @@
 
 #define POST_BUFF_SIZE 1024
 
-int mojang_authenticate(const char *username, const char *password, string_t **client_token, string_t **access_token,
-                        string_t **uuid)
+int mojang_authenticate(const char *username, const char *password, string_t **client_token,
+                        string_t **access_token, string_t **uuid)
 {
     CURL *curl = curl_easy_init();
     if(curl == NULL) {
@@ -92,7 +92,8 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
     sockbuff_free(data);
     return 0;
 }
-int mojang_join(string_t *client_token, string_t *access_token, string_t *player_uuid, string_t *server_id)
+int mojang_join(string_t *client_token, string_t *access_token, string_t *player_uuid,
+                string_t *server_id)
 {
     CURL *curl = curl_easy_init();
     if(curl == NULL) {
@@ -102,16 +103,19 @@ int mojang_join(string_t *client_token, string_t *access_token, string_t *player
 
     // format data buffer
     char post_buffer[POST_BUFF_SIZE + 1];
-    int n_bytes = snprintf(post_buffer, POST_BUFF_SIZE,
-                           "{\"clientToken\": \"%s\", \"accessToken\": \"%s\", \"selectedProfile\": "
-                           "\"%s\", \"serverId\": \"%s\"}",
-                           client_token->s, access_token->s, player_uuid->s, server_id->s);
+    int n_bytes =
+        snprintf(post_buffer, POST_BUFF_SIZE,
+                 "{\"clientToken\": \"%s\", \"accessToken\": \"%s\", \"selectedProfile\": "
+                 "\"%s\", \"serverId\": \"%s\"}",
+                 client_token->s, access_token->s, player_uuid->s, server_id->s);
     if(n_bytes == POST_BUFF_SIZE) {
         error("auth", "json username/password buffer too long");
         return 1;
     }
 
-    verbose("auth", "sending post data to https://sessionserver.mojang.com/session/minecraft/join: %s", post_buffer);
+    verbose("auth",
+            "sending post data to https://sessionserver.mojang.com/session/minecraft/join: %s",
+            post_buffer);
 
     sockbuff_t *data = sockbuff_create();
     if(data == NULL) {
