@@ -46,13 +46,13 @@ file(GLOB_RECURSE PACKET_FILES src/packets/*.c)
 file(GLOB_RECURSE HANDLER_FILES src/handlers/*.c)
 set(SOURCE_FILES
     src/varint.c
-    src/string.c
+    src/dynstring.c
     src/world.c
     src/hashmap.c
     src/tablist.c
     src/connection.c
-    src/unionstream.c
-    src/sockbuff.c
+    src/stream.c
+    src/buffer.c
     src/packet_handler.c
     src/auth/mojang_auth.c
     src/utils.c

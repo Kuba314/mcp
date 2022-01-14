@@ -1,4 +1,4 @@
-#include "_string.h"
+#include "dynstring.h"
 
 #include <stdio.h>
 #include <stdlib.h>

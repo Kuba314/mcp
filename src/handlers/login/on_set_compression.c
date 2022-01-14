@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "unionstream.h"
+#include "stream.h"
 #include "debug.h"
 
 extern size_t g_compression_threshold;
 
-int on_set_compression(unionstream_t *stream)
+int on_set_compression(stream_t *stream)
 {
     int32_t tmp;
     if(stream_read_varint(stream, &tmp)) {

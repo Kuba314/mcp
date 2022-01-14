@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "sockbuff.h"
+#include "buffer.h"
 #include "json.h"
 
 static const char *get_color_prefix_from_ssign(char c)
@@ -35,7 +35,7 @@ static const char *get_color_prefix_from_ssign(char c)
     return colors[(uint8_t) c];
 }
 
-static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
+static int parse_message_atom_text(buffer_t *buff, json_value *json)
 {
     static const char *const clrmap[][2] = {
         {"black",         "\033[0;30m"},
@@ -80,7 +80,7 @@ static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
             if(strcmp(clrmap[i][0], color.s) == 0) {
                 found = true;
                 const char *clrbytes = clrmap[i][1];
-                sockbuff_write(buff, clrbytes, strlen(clrbytes));
+                buffer_write(buff, clrbytes, strlen(clrbytes));
                 break;
             }
         }
@@ -97,17 +97,17 @@ static int parse_message_atom_text(sockbuff_t *buff, json_value *json)
         for(uint32_t i = 0; i < text.length; i++) {
             if(escaped) {
                 const char *clr_prefix = get_color_prefix_from_ssign(text.s[i]);
-                sockbuff_write(buff, clr_prefix, strlen(clr_prefix));
+                buffer_write(buff, clr_prefix, strlen(clr_prefix));
                 escaped = false;
             } else if(strncmp(text.s + i, "§", 2) == 0) {
                 escaped = true;
                 i++; // skip second § char
             } else {
-                sockbuff_write(buff, &text.s[i], 1);
+                buffer_write(buff, &text.s[i], 1);
             }
         }
     }
-    sockbuff_write(buff, "\033(B\033[m", strlen("\033(B\033[m"));
+    buffer_write(buff, "\033(B\033[m", strlen("\033(B\033[m"));
     return 0;
 }
 static int print_chat_message(string_t *json)
@@ -124,7 +124,7 @@ static int print_chat_message(string_t *json)
         return 1;
     }
 
-    sockbuff_t *buff = sockbuff_create();
+    buffer_t *buff = buffer_create();
     if(buff == NULL) {
         json_value_free(parsed);
         return 1;
@@ -132,7 +132,7 @@ static int print_chat_message(string_t *json)
 
     if(parse_message_atom_text(buff, parsed)) {
         json_value_free(parsed);
-        sockbuff_free(buff);
+        buffer_free(buff);
         return 1;
     }
     for(uint32_t i = 0; i < parsed->u.object.length; i++) {
@@ -142,7 +142,7 @@ static int print_chat_message(string_t *json)
             if(entry.value->type != json_array) {
                 error("json", "\"extra\" value is not array, but %d", entry.value->type);
                 json_value_free(parsed);
-                sockbuff_free(buff);
+                buffer_free(buff);
                 return 1;
             }
 
@@ -150,7 +150,7 @@ static int print_chat_message(string_t *json)
                 json_value *extra_el = entry.value->u.array.values[j];
                 if(parse_message_atom_text(buff, extra_el)) {
                     json_value_free(parsed);
-                    sockbuff_free(buff);
+                    buffer_free(buff);
                     return 1;
                 }
             }
@@ -162,11 +162,11 @@ static int print_chat_message(string_t *json)
     print_bytes(buff->data, buff->length);
     info_end();
 
-    sockbuff_free(buff);
+    buffer_free(buff);
     return 0;
 }
 
-int on_chat_message(unionstream_t *stream)
+int on_chat_message(stream_t *stream)
 {
     string_t *json_data = stream_read_string(stream);
     if(json_data == NULL) {

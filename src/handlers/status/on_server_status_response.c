@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_server_status_response(unionstream_t *stream)
+int on_server_status_response(stream_t *stream)
 {
     string_t *status = stream_read_string(stream);
     if(status == NULL) {

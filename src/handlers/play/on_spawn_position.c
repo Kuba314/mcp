@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_spawn_position(unionstream_t *stream)
+int on_spawn_position(stream_t *stream)
 {
     position_t respawn_point;
     if(stream_read_position(stream, &respawn_point)) {

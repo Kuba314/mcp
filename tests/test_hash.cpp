@@ -4,7 +4,7 @@ extern "C" {
 #include <stdlib.h>
 #include <openssl/sha.h>
 
-#include "_string.h"
+#include "dynstring.h"
 #include "utils.h"
 }
 

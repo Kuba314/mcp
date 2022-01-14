@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_server_difficulty(unionstream_t *stream)
+int on_server_difficulty(stream_t *stream)
 {
     uint8_t difficulty;
     if(stream_read_ubyte(stream, &difficulty)) {

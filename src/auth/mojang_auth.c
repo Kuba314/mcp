@@ -10,8 +10,8 @@
 #include <curl/curl.h>
 
 #include <openssl/sha.h>
-#include "_string.h"
-#include "sockbuff.h"
+#include "dynstring.h"
+#include "buffer.h"
 #include "utils.h"
 #include "config.h"
 #include "debug.h"
@@ -38,7 +38,7 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
         return 1;
     }
 
-    sockbuff_t *data = sockbuff_create();
+    buffer_t *data = buffer_create();
     if(data == NULL) {
         return 1;
     }
@@ -89,7 +89,7 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
     verbose("auth", "extracted player uuid: \"%s\"", (*uuid)->s);
 
     json_value_free(parsed);
-    sockbuff_free(data);
+    buffer_free(data);
     return 0;
 }
 int mojang_join(string_t *client_token, string_t *access_token, string_t *player_uuid,
@@ -117,7 +117,7 @@ int mojang_join(string_t *client_token, string_t *access_token, string_t *player
             "sending post data to https://sessionserver.mojang.com/session/minecraft/join: %s",
             post_buffer);
 
-    sockbuff_t *data = sockbuff_create();
+    buffer_t *data = buffer_create();
     if(data == NULL) {
         return 1;
     }
@@ -152,7 +152,7 @@ int mojang_join(string_t *client_token, string_t *access_token, string_t *player
         verbose_end();
     }
 
-    sockbuff_free(data);
+    buffer_free(data);
     return 0;
 }
 

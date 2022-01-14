@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_held_item_change(unionstream_t *stream)
+int on_held_item_change(stream_t *stream)
 {
     int8_t slot;
     if(stream_read_byte(stream, &slot)) {

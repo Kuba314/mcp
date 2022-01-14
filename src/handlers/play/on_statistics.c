@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_statistics(unionstream_t *stream)
+int on_statistics(stream_t *stream)
 {
     int32_t count;
     if(stream_read_varint(stream, &count)) {

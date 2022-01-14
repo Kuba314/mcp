@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "_string.h"
+#include "dynstring.h"
 #include "debug.h"
 
 char int2hex(char c)
@@ -74,9 +74,9 @@ uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
     return hash_hex;
 }
 
-size_t bufwrite(void *ptr, size_t size, size_t nmemb, sockbuff_t *buff)
+size_t bufwrite(void *ptr, size_t size, size_t nmemb, buffer_t *buff)
 {
-    sockbuff_write(buff, ptr, size * nmemb);
+    buffer_write(buff, ptr, size * nmemb);
     return size * nmemb;
 }
 

@@ -6,18 +6,18 @@
 #include "debug.h"
 
 // packet handlers
-static int (*const handshake_packet_handlers[])(unionstream_t *) = { NULL };
-static int (*const status_packet_handlers[])(unionstream_t *) = {
+static int (*const handshake_packet_handlers[])(stream_t *) = { NULL };
+static int (*const status_packet_handlers[])(stream_t *) = {
     [0x00] = on_server_status_response,
     [0x01] = on_server_pong,
 };
-static int (*const login_packet_handlers[])(unionstream_t *) = {
+static int (*const login_packet_handlers[])(stream_t *) = {
     [0x00] = on_login_disconnect,
     [0x01] = on_encryption_request,
     [0x02] = on_login_success,
     [0x03] = on_set_compression,
 };
-static int (*const play_packet_handlers[])(unionstream_t *) = {
+static int (*const play_packet_handlers[])(stream_t *) = {
     [0x00] = on_keep_alive,
     [0x01] = on_join_game,
     [0x02] = on_chat_message,
@@ -104,9 +104,9 @@ static char *get_conn_state_name()
 }
 
 conn_state_t g_connection_state = CONN_STATE_HANDSHAKE;
-int handle_packet(int32_t packet_id, unionstream_t *stream)
+int handle_packet(int32_t packet_id, stream_t *stream)
 {
-    static int (*const *all_packet_handlers[])(unionstream_t *) = {
+    static int (*const *all_packet_handlers[])(stream_t *) = {
         handshake_packet_handlers,
         status_packet_handlers,
         login_packet_handlers,
@@ -122,7 +122,7 @@ int handle_packet(int32_t packet_id, unionstream_t *stream)
     if((uint32_t) packet_id < n_handlers[g_connection_state]) {
 
         // call packet handler if it exists
-        int (*func)(unionstream_t *) = all_packet_handlers[g_connection_state][packet_id];
+        int (*func)(stream_t *) = all_packet_handlers[g_connection_state][packet_id];
         if(func != NULL) {
             return func(stream);
         }

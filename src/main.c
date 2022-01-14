@@ -5,7 +5,7 @@
 #include <signal.h>
 
 #include "packet_handler.h"
-#include "unionstream.h"
+#include "stream.h"
 #include "connection.h"
 #include "packets.h"
 #include "world.h"
@@ -47,7 +47,7 @@ void *run_main_loop(void *stream)
     return NULL;
 }
 
-void run_console(unionstream_t *stream)
+void run_console(stream_t *stream)
 {
     (void) stream;
     while(running) {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    unionstream_t *stream;
+    stream_t *stream;
     if(stream_create(sockfd, &stream)) {
         return 1;
     }

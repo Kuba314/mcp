@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_server_pong(unionstream_t *stream)
+int on_server_pong(stream_t *stream)
 {
     // should be big endian, but whatever
     // just needed to consume 8 bytes

@@ -2,7 +2,7 @@
 
 #include "world.h"
 
-int on_player_list_item(unionstream_t *stream)
+int on_player_list_item(stream_t *stream)
 {
     int32_t action;
     if(stream_read_varint(stream, &action)) {

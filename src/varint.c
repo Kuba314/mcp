@@ -1,6 +1,6 @@
 #include "varint.h"
 
-#include "unionstream.h"
+#include "stream.h"
 #include "debug.h"
 
 int read_varint(const uint8_t *buff, int32_t *result, uint8_t *n_read)

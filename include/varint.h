@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "unionstream.h"
+#include "stream.h"
 
 int read_varint(const uint8_t *buff, int32_t *result, uint8_t *n_read);
 int read_varlong(const uint8_t *buff, int64_t *result, uint8_t *n_read);

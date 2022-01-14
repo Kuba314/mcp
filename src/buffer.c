@@ -1,4 +1,4 @@
-#include "sockbuff.h"
+#include "buffer.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,17 +7,17 @@
 #include "varint.h"
 #include "debug.h"
 
-sockbuff_t *sockbuff_create()
+buffer_t *buffer_create()
 {
-    sockbuff_t *buff = malloc(sizeof(sockbuff_t));
+    buffer_t *buff = malloc(sizeof(buffer_t));
     if(buff == NULL) {
-        perror("sockbuff_create");
+        perror("buff_create");
         return NULL;
     }
 
     buff->data = malloc(SOCKBUFF_INITIAL_SIZE);
     if(buff->data == NULL) {
-        perror("sockbuff_create");
+        perror("buff_create");
         free(buff);
         return NULL;
     }
@@ -26,7 +26,7 @@ sockbuff_t *sockbuff_create()
     buff->alloc_length = SOCKBUFF_INITIAL_SIZE;
     return buff;
 }
-void sockbuff_free(sockbuff_t *buff)
+void buffer_free(buffer_t *buff)
 {
     if(buff->data != NULL) {
         free(buff->data);
@@ -34,14 +34,14 @@ void sockbuff_free(sockbuff_t *buff)
     free(buff);
 }
 
-int sockbuff_write(sockbuff_t *buff, const void *src, size_t length)
+int buffer_write(buffer_t *buff, const void *src, size_t length)
 {
     while(buff->length + length + 1 > buff->alloc_length) {
         buff->alloc_length *= 2;
         void *tmp = realloc(buff->data, buff->alloc_length + 1);
         if(tmp == NULL) {
             alloc_error();
-            sockbuff_free(buff);
+            buffer_free(buff);
             return 1;
         }
 
@@ -54,20 +54,20 @@ int sockbuff_write(sockbuff_t *buff, const void *src, size_t length)
     return 0;
 }
 
-extern int sockbuff_write_byte(sockbuff_t *buff, uint8_t byte);
-extern int sockbuff_write_short(sockbuff_t *buff, uint16_t value);
-extern int sockbuff_write_c_string(sockbuff_t *buff, const char *src, size_t length);
-extern int sockbuff_write_string(sockbuff_t *buff, string_t *string);
+extern int buffer_write_byte(buffer_t *buff, uint8_t byte);
+extern int buffer_write_short(buffer_t *buff, uint16_t value);
+extern int buffer_write_c_string(buffer_t *buff, const char *src, size_t length);
+extern int buffer_write_string(buffer_t *buff, string_t *string);
 
-int sockbuff_write_varint(sockbuff_t *buff, int32_t value)
+int buffer_write_varint(buffer_t *buff, int32_t value)
 {
     uint8_t bytes[5];
     size_t n_bytes = format_varint(bytes, value);
-    return sockbuff_write(buff, bytes, n_bytes);
+    return buffer_write(buff, bytes, n_bytes);
 }
-int sockbuff_write_varlong(sockbuff_t *buff, int64_t value)
+int buffer_write_varlong(buffer_t *buff, int64_t value)
 {
     uint8_t bytes[10];
     size_t n_bytes = format_varlong(bytes, value);
-    return sockbuff_write(buff, bytes, n_bytes);
+    return buffer_write(buff, bytes, n_bytes);
 }

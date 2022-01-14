@@ -1,8 +1,8 @@
-#include "unionstream.h"
-#include "_string.h"
+#include "stream.h"
+#include "dynstring.h"
 #include "debug.h"
 
-int on_login_disconnect(unionstream_t *stream)
+int on_login_disconnect(stream_t *stream)
 {
     string_t *reason = stream_read_string(stream);
     if(reason == NULL) {

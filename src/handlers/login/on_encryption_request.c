@@ -60,7 +60,7 @@ static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token,
     return 0;
 }
 
-static int init_stream_for_encryption(unionstream_t *stream)
+static int init_stream_for_encryption(stream_t *stream)
 {
     // init encryption
     stream->en_ctx = EVP_CIPHER_CTX_new();
@@ -89,11 +89,11 @@ static int init_stream_for_encryption(unionstream_t *stream)
     }
 
     stream->is_encrypted = true;
-    debug("auth", "unionstream is now encrypted");
+    debug("auth", "stream is now encrypted");
     return 0;
 }
 
-int on_encryption_request(unionstream_t *stream)
+int on_encryption_request(stream_t *stream)
 {
     string_t *server_id = stream_read_string(stream);
     if(server_id == NULL)
@@ -135,7 +135,7 @@ int on_encryption_request(unionstream_t *stream)
         return 1;
     }
 
-    // enable encryption on unionstream
+    // enable encryption on stream
     if(init_stream_for_encryption(stream)) {
         return 1;
     }

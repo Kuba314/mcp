@@ -11,7 +11,7 @@ Level Type          String          default, flat, largeBiomes, amplified, defau
 Reduced Debug Info  Boolean         show reduced debug info screen
 */
 
-int on_join_game(unionstream_t *stream)
+int on_join_game(stream_t *stream)
 {
     int entity_id;
     if(stream_read_int(stream, &entity_id)) {

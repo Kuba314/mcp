@@ -1,11 +1,11 @@
-#include "unionstream.h"
-#include "_string.h"
+#include "stream.h"
+#include "dynstring.h"
 #include "debug.h"
 #include <string.h>
 
 #include "packet_handler.h"
 
-int on_login_success(unionstream_t *stream)
+int on_login_success(stream_t *stream)
 {
     string_t *uuid = stream_read_string(stream);
     if(uuid == NULL) {

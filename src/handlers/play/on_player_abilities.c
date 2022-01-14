@@ -1,6 +1,6 @@
 #include "packet_handler.h"
 
-int on_player_abilities(unionstream_t *stream)
+int on_player_abilities(stream_t *stream)
 {
     int8_t flags;
     if(stream_read_byte(stream, &flags)) {
