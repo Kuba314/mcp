@@ -1,10 +1,10 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
 #include <string.h>
 #include <stdint.h>
 
-#include "buffer.h"
-#include "json.h"
+#include "utils/buffer.h"
+#include "utils/json.h"
 
 static const char *get_color_prefix_from_ssign(char c)
 {

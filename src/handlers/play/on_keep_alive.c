@@ -1,6 +1,6 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
-#include "packets.h"
+#include "net/packets.h"
 
 int on_keep_alive(stream_t *stream)
 {

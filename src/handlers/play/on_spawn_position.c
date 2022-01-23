@@ -1,4 +1,4 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
 int on_spawn_position(stream_t *stream)
 {

@@ -1,4 +1,4 @@
-#include "stream.h"
+#include "net/stream.h"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <zlib.h>
 
-#include "varint.h"
+#include "data/varint.h"
 #include "debug.h"
 
 size_t g_compression_threshold = 0;

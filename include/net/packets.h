@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-#include "stream.h"
-#include "buffer.h"
-#include "dynstring.h"
+#include "net/stream.h"
+#include "utils/buffer.h"
+#include "utils/dynstring.h"
 
 // handshake
 int send_Handshake(stream_t *stream, int32_t proto_version, uint8_t next_state);

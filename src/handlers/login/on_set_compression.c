@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "stream.h"
+#include "net/stream.h"
 #include "debug.h"
 
 extern size_t g_compression_threshold;

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "dynstring.h"
+#include "utils/dynstring.h"
 
 typedef struct {
     char *data;

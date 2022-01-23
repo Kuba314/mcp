@@ -1,5 +1,5 @@
-#include "stream.h"
-#include "dynstring.h"
+#include "net/stream.h"
+#include "utils/dynstring.h"
 #include "debug.h"
 
 int on_login_disconnect(stream_t *stream)

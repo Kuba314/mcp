@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tablist.h"
+#include "data/tablist.h"
 
 typedef struct {
     tablist_t *tablist;

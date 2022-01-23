@@ -1,8 +1,8 @@
-#include "world.h"
+#include "data/world.h"
 
 #include <stdlib.h>
 
-#include "tablist.h"
+#include "data/tablist.h"
 #include "debug.h"
 
 world_t *world = NULL;

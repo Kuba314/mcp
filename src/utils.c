@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils/utils.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "dynstring.h"
+#include "utils/dynstring.h"
 #include "debug.h"
 
 char int2hex(char c)

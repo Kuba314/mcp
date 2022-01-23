@@ -1,4 +1,4 @@
-#include "packets.h"
+#include "net/packets.h"
 
 int send_ChatMessage(stream_t *stream, const char *message, size_t message_len)
 {

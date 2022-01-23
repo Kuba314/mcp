@@ -1,5 +1,5 @@
-#include "packets.h"
-#include "packet_handler.h"
+#include "net/packets.h"
+#include "net/packet_handler.h"
 
 int send_Handshake(stream_t *stream, int32_t proto_version, uint8_t next_state)
 {

@@ -1,4 +1,4 @@
-#include "packets.h"
+#include "net/packets.h"
 
 int send_LoginStart(stream_t *stream, const char *username, size_t username_length)
 {

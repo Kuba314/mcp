@@ -5,9 +5,9 @@
 #include <openssl/evp.h>
 #include <semaphore.h>
 
-#include "buffer.h"
-#include "position.h"
-#include "dynstring.h"
+#include "utils/buffer.h"
+#include "data/position.h"
+#include "utils/dynstring.h"
 
 typedef struct {
     int sockfd;

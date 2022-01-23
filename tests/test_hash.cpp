@@ -4,8 +4,8 @@ extern "C" {
 #include <stdlib.h>
 #include <openssl/sha.h>
 
-#include "dynstring.h"
-#include "utils.h"
+#include "utils/dynstring.h"
+#include "utils/utils.h"
 }
 
 TEST(Hashes, Notch)

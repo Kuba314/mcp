@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#include "stream.h"
-#include "dynstring.h"
+#include "net/stream.h"
+#include "utils/dynstring.h"
 #include "debug.h"
 
 typedef enum

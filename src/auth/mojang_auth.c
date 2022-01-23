@@ -10,9 +10,9 @@
 #include <curl/curl.h>
 
 #include <openssl/sha.h>
-#include "dynstring.h"
-#include "buffer.h"
-#include "utils.h"
+#include "utils/dynstring.h"
+#include "utils/buffer.h"
+#include "utils/utils.h"
 #include "config.h"
 #include "debug.h"
 

@@ -1,9 +1,9 @@
-#include "stream.h"
-#include "dynstring.h"
+#include "net/stream.h"
+#include "utils/dynstring.h"
 #include "debug.h"
 #include <string.h>
 
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
 int on_login_success(stream_t *stream)
 {

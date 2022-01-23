@@ -1,4 +1,4 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
 int on_server_difficulty(stream_t *stream)
 {

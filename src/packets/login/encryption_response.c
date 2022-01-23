@@ -1,4 +1,4 @@
-#include "packets.h"
+#include "net/packets.h"
 
 int send_EncryptionResponse(stream_t *stream, string_t *enc_aes_key, string_t *enc_verify_token)
 {

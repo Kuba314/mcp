@@ -1,4 +1,4 @@
-#include "packets.h"
+#include "net/packets.h"
 
 int send_StatusRequest(stream_t *stream)
 {

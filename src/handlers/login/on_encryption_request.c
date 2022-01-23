@@ -1,5 +1,5 @@
-#include "packet_handler.h"
-#include "packets.h"
+#include "net/packet_handler.h"
+#include "net/packets.h"
 
 #include <openssl/err.h>
 #include <openssl/rand.h>

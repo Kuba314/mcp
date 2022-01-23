@@ -1,9 +1,9 @@
-#include "json.h"
+#include "utils/json.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "utils.h"
+#include "utils/utils.h"
 #include "debug.h"
 
 static void skip_whitespace(char **ptr)

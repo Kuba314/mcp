@@ -1,4 +1,4 @@
-#include "connection.h"
+#include "net/connection.h"
 
 #include <stdio.h>
 #include <string.h>

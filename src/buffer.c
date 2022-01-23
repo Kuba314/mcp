@@ -1,10 +1,10 @@
-#include "buffer.h"
+#include "utils/buffer.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
-#include "varint.h"
+#include "data/varint.h"
 #include "debug.h"
 
 buffer_t *buffer_create()

@@ -1,4 +1,4 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
 #include <stdlib.h>
 
@@ -74,7 +74,7 @@ static int (*const play_packet_handlers[])(stream_t *) = {
     // [0x35] = on_update_block_entity,
     // [0x36] = on_open_sign_editor,
     [0x37] = on_statistics,
-    // [0x38] = on_player_list_item,
+    [0x38] = on_player_list_item,
     [0x39] = on_player_abilities,
     // [0x3a] = on_tabcomplete,
     // [0x3b] = on_scoreboard_objective,

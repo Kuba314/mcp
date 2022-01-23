@@ -4,11 +4,11 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "packet_handler.h"
-#include "stream.h"
-#include "connection.h"
-#include "packets.h"
-#include "world.h"
+#include "net/packet_handler.h"
+#include "net/stream.h"
+#include "net/connection.h"
+#include "net/packets.h"
+#include "data/world.h"
 #include "debug.h"
 
 #include "config.h"
@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int sockfd = connect_to_server(HYPIXEL_IP, 25565);
-    // int sockfd = connect_to_server(LOCALHOST, 25565);
+    // int sockfd = connect_to_server(HYPIXEL_IP, 25565);
+    int sockfd = connect_to_server(LOCALHOST, 25565);
     if(sockfd < 0) {
         return 1;
     }

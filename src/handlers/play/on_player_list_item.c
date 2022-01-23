@@ -1,6 +1,6 @@
-#include "packet_handler.h"
+#include "net/packet_handler.h"
 
-#include "world.h"
+#include "data/world.h"
 
 int on_player_list_item(stream_t *stream)
 {

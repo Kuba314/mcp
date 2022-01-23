@@ -1,4 +1,4 @@
-#include "tablist.h"
+#include "data/tablist.h"
 
 #include <stdlib.h>
 
