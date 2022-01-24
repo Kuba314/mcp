@@ -41,8 +41,12 @@ const struct _json_value json_value_none;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <math.h>
+
+#include "debug.h"
 
 typedef unsigned int json_uchar;
 
@@ -922,4 +926,49 @@ void json_value_free(json_value *value)
     json_settings settings = { 0 };
     settings.mem_free = default_free;
     json_value_free_ex(&settings, value);
+}
+
+int json_extract_string(json_value *json, string_t **dest, ...)
+{
+    va_list args;
+    va_start(args, dest);
+
+    json_value *obj = json;
+    const char *curr = va_arg(args, const char *);
+    bool found_key;
+    while(curr != NULL) {
+        if(obj->type != json_object) {
+            error("json", "not an object");
+            va_end(args);
+            return 1;
+        }
+
+        found_key = false;
+        for(uint32_t i = 0; i < obj->u.object.length; i++) {
+            json_object_entry entry = obj->u.object.values[i];
+
+            if(strncmp(entry.name, curr, entry.name_length) == 0) {
+                obj = entry.value;
+                curr = va_arg(args, const char *);
+                found_key = true;
+                break;
+            }
+        }
+        if(!found_key) {
+            error("json", "key %s not found in object", curr);
+            va_end(args);
+            return 1;
+        }
+    }
+    va_end(args);
+
+    if(obj->type != json_string) {
+        error("json", "json type is not a string");
+        return 1;
+    }
+    *dest = string_create(obj->u.string.ptr, obj->u.string.length);
+    if(*dest == NULL) {
+        return 1;
+    }
+    return 0;
 }

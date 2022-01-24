@@ -12,11 +12,82 @@
 #include <openssl/sha.h>
 #include "utils/dynstring.h"
 #include "utils/buffer.h"
-#include "utils/utils.h"
+#include "utils/json.h"
 #include "config.h"
 #include "debug.h"
 
 #define POST_BUFF_SIZE 1024
+
+static char int2hex(char c)
+{
+    return c + ((c < 10) ? '0' : 'a' - 10);
+}
+
+static uint8_t *sha_mc_hexlify(unsigned char *hash, size_t length, size_t *out_length)
+{
+
+    // negative hash and null byte
+    uint8_t *hash_hex = malloc(length * 2 + 2);
+    if(hash_hex == NULL) {
+        alloc_error();
+        return NULL;
+    }
+
+    // space out the chars, count zeros
+    int n_zeros = 0;
+    bool nonzero_found = false;
+    for(size_t i = 0; i < length; i++) {
+        hash_hex[i * 2] = hash[i] >> 4;
+        hash_hex[i * 2 + 1] = hash[i] & 0xf;
+
+        if(hash_hex[i * 2] == 0 && !nonzero_found) {
+            n_zeros++;
+            if(hash_hex[i * 2 + 1] == 0) {
+                n_zeros++;
+                continue;
+            }
+        }
+        nonzero_found = true;
+    }
+
+    int sign = hash[0] >> 7;
+    if(sign) {
+        int carry = 0;
+        for(int i = 2 * length - 1; i >= 0; i--) {
+
+            unsigned char new_c = (hash_hex[i] ^ 0xf) + carry;
+            if(i == (int) length * 2 - 1) {
+                new_c++;
+            }
+            carry = new_c >> 4;
+            hash_hex[i] = new_c & 0xf;
+        }
+    }
+
+    // move correctly
+    if(sign || n_zeros) {
+        memmove(hash_hex + sign, hash_hex + n_zeros, length * 2 - n_zeros);
+        if(sign) {
+            hash_hex[0] = '-';
+        }
+    }
+
+    // convert to readable format
+    for(int i = sign; i < (int) length * 2 + sign - n_zeros; i++) {
+        hash_hex[i] = int2hex(hash_hex[i]);
+    }
+
+    *out_length = length * 2 + sign - n_zeros;
+    hash_hex[*out_length] = '\0';
+    return hash_hex;
+}
+
+// used as a curl callback
+static size_t bufwrite(void *ptr, size_t size, size_t nmemb, buffer_t *buff)
+{
+    buffer_write(buff, ptr, size * nmemb);
+    return size * nmemb;
+}
 
 int mojang_authenticate(const char *username, const char *password, string_t **client_token,
                         string_t **access_token, string_t **uuid)

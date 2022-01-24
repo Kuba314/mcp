@@ -41,6 +41,8 @@
 
 #include <stddef.h>
 
+#include "dynstring.h"
+
 typedef struct {
     unsigned long max_memory;
     int settings;
@@ -124,6 +126,8 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
                           char *error);
 
 void json_value_free(json_value *);
+
+int json_extract_string(json_value *json, string_t **dest, ...);
 
 /* Not usually necessary, unless you used a custom mem_alloc and now want to
  * use a custom mem_free.
