@@ -7,7 +7,7 @@ else
     format_command="clang-format"
 fi
 cwd="$(dirname "$0")"
-sources="$(find "$cwd"/src "$cwd"/include "$cwd"/tests -type f \( -name '*.h' -or -name '*.c'  -or -name '*.cpp' \) )"
+sources="$(find "$cwd"/mcp -type f \( -name '*.h' -or -name '*.c' \) )"
 num_errors=0
 
 for source in $sources

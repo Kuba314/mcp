@@ -12,7 +12,7 @@
 #include "debug.h"
 
 #include "config.h"
-#include "auth.h"
+#include "auth/auth.h"
 
 #define HYPIXEL_IP "172.65.234.205"
 #define LOCALHOST "127.0.0.1"

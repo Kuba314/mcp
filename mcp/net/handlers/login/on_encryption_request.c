@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "auth.h"
+#include "auth/auth.h"
 
 unsigned char g_aes_key[16];
 unsigned char g_aes_iv[16];
