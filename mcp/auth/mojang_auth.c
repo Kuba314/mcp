@@ -133,11 +133,7 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
 
-    verbose_begin("auth", "mojang authserver: ");
-    for(size_t i = 0; i < data->length; i++) {
-        verbose_frag("%c", data->data[i]);
-    }
-    verbose_end();
+    verbose("auth", "mojang authserver: %.*s", data->length, data->data);
 
     json_value *parsed = json_parse(data->data, data->length);
     if(parsed == NULL || parsed->type != json_object) {
@@ -216,11 +212,7 @@ int mojang_join(string_t *client_token, string_t *access_token, string_t *player
     curl_easy_cleanup(curl);
 
     if(http_code != 204) {
-        verbose_begin("auth", "mojang sessionserver: HTTP %ld ", http_code);
-        for(size_t i = 0; i < data->length; i++) {
-            verbose_frag("%c", data->data[i]);
-        }
-        verbose_end();
+        verbose("auth", "mojang sessionserver: HTTP %ld %.*s", http_code, data->length, data->data);
     }
 
     buffer_free(data);
@@ -248,9 +240,7 @@ int authenticate_with_mojang(string_t *server_id, string_t *pubkey)
         return 1;
     }
 
-    verbose_begin("auth", "sha1: ");
-    verbose_string(hash_hex, hash_length);
-    verbose_end();
+    verbose("auth", "sha1: %.*s", hash_length, hash_hex);
 
     string_t *server_id_hash = string_create((char *) hash_hex, hash_length);
 

@@ -99,25 +99,19 @@ int on_encryption_request(stream_t *stream)
     if(server_id == NULL)
         return 1;
 
-    verbose_begin("server_id", "");
-    verbose_bytes(server_id->s, server_id->length);
-    verbose_end();
+    // verbose("server_id", "%.*s", server_id->length, server_id->s);
 
     string_t *pubkey = stream_read_string(stream);
     if(pubkey == NULL)
         return 1;
 
-    verbose_begin("pubkey", "");
-    verbose_bytes(pubkey->s, pubkey->length);
-    verbose_end();
+    // verbose("pubkey", "%.*s", pubkey->length, pubkey->s);
 
     string_t *verify_token = stream_read_string(stream);
     if(verify_token == NULL)
         return 1;
 
-    verbose_begin("verify_token", "");
-    verbose_bytes(verify_token->s, verify_token->length);
-    verbose_end();
+    // verbose("verify_token", "%.*s", verify_token->length, verify_token->s);
 
     string_t *enc_aes_key;
     string_t *enc_verify_token;

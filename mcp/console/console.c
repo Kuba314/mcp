@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <ncurses.h>
@@ -32,23 +33,47 @@ static void redraw_scrollable(scrollable_window_t *sw)
     size_t x, y;
     getmaxyx(sw->win, y, x);
     werase(sw->win);
-    box(sw->win, 0, 0);
-    for(size_t i = 0; i < y - 2 && i < sw->msg_count; i++) {
-        const char *msg = sw->buffer[(sw->buffer_offset + sw->msg_count - i - 1) % SCROLLABLE_WINDOW_BUFFER_SIZE];
+
+    for(size_t i = 0; i < y && i < sw->msg_count; i++) {
+        const char *msg =
+            sw->buffer[(sw->buffer_offset + sw->msg_count - i - 1) % SCROLLABLE_WINDOW_BUFFER_SIZE];
         size_t msg_len = strlen(msg);
-        if(msg_len > x - 2) {
-            mvwprintw(sw->win, y - i - 2, 1, "%.*s", x - 5, msg);
-            wprintw(sw->win, "...");
-        } else {
-            mvwprintw(sw->win, y - i - 2, 1, "%s", msg);
+        size_t n_printed = 0;
+
+        wmove(sw->win, y - i - 1, 0);
+        bool escaped = false;
+        for(size_t i = 0; i < msg_len; i++) {
+            if(msg_len > x) {
+                if(n_printed == x) {
+                    break;
+                } else if(n_printed >= x - 3) {
+                    // attroff(COLOR_PAIR(1));
+                    waddch(sw->win, '.');
+                    n_printed++;
+                    continue;
+                }
+            }
+            if(escaped) {
+                // const char *clr_prefix = get_color_prefix_from_ssign(msg[i]);
+                // attron(COLOR_PAIR(1));
+                // fputs(clr_prefix, stderr);
+                escaped = false;
+            } else if(strncmp(msg + i, "§", 2) == 0) {
+                escaped = true;
+                i++; // skip second § char
+            } else {
+                waddch(sw->win, msg[i]);
+                n_printed++;
+                // attroff(COLOR_PAIR(1));
+            }
         }
+        // mvwprintw(sw->win, y - i - 2, 1, "%s", msg);
     }
     wrefresh(sw->win);
 }
-int scrollable_push(scrollable_window_t *sw, const char *text)
+int scrollable_push(scrollable_window_t *sw, const char *text, size_t length)
 {
-    size_t text_len = strlen(text);
-    char *new_text = malloc(text_len + 1);
+    char *new_text = malloc(length + 1);
     if(new_text == NULL) {
         return 1;
     }
@@ -59,7 +84,8 @@ int scrollable_push(scrollable_window_t *sw, const char *text)
         sw->buffer[sw->buffer_offset] = new_text;
         sw->buffer_offset = (sw->buffer_offset + 1) % SCROLLABLE_WINDOW_BUFFER_SIZE;
     } else {
-        sw->buffer[(sw->buffer_offset + sw->msg_count++) % SCROLLABLE_WINDOW_BUFFER_SIZE] = new_text;
+        sw->buffer[(sw->buffer_offset + sw->msg_count++) % SCROLLABLE_WINDOW_BUFFER_SIZE] =
+            new_text;
     }
 
     redraw_scrollable(sw);
@@ -112,11 +138,11 @@ void cctx_redraw_all(void)
     int maxX, maxY;
     getmaxyx(stdscr, maxY, maxX);
 
-    wresize(ctx.dbg_win.win, maxY - 1, maxX / 2);
+    wresize(ctx.dbg_win.win, maxY - 2, maxX / 2);
     mvwin(ctx.dbg_win.win, 0, 0);
 
-    wresize(ctx.chat_win.win, maxY - 1, maxX / 2);
-    mvwin(ctx.chat_win.win, 0, maxX / 2);
+    wresize(ctx.chat_win.win, maxY - 2, (maxX - 1) / 2);
+    mvwin(ctx.chat_win.win, 0, maxX / 2 + 1);
 
     wresize(ctx.input_type_win, 1, 1);
     mvwin(ctx.input_type_win, maxY - 1, 0);
@@ -125,6 +151,9 @@ void cctx_redraw_all(void)
     mvwin(ctx.input_win, maxY - 1, 2);
 
     erase();
+    mvvline(0, maxX / 2, ACS_VLINE, maxY - 2);
+    mvhline(maxY - 2, 0, ACS_HLINE, maxX);
+    mvaddch(maxY - 2, maxX / 2, ACS_BTEE);
     refresh();
 
     redraw_scrollable(&ctx.dbg_win);
@@ -140,16 +169,18 @@ void cctx_redraw_all(void)
 void console_init(void)
 {
     initscr();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
     noecho();
     cbreak();
 
     int maxX, maxY;
     getmaxyx(stdscr, maxY, maxX);
 
-    WINDOW *dbg_win = newwin(maxY - 1, maxX / 2, 0, 0);
+    WINDOW *dbg_win = newwin(maxY - 2, maxX / 2, 0, 0);
     scrollable_init(&ctx.dbg_win, dbg_win);
 
-    WINDOW *chat_win = newwin(maxY - 1, maxX / 2, 0, maxX / 2);
+    WINDOW *chat_win = newwin(maxY - 2, (maxX - 1) / 2, 0, (maxX - 1) / 2 + 1);
     scrollable_init(&ctx.chat_win, chat_win);
 
     ctx.input_type_win = newwin(1, 1, maxY - 1, 0);
@@ -182,38 +213,42 @@ void console_free(void)
 
     endwin();
 }
-void console_debug(const char *msg)
+
+#define BUFF_LENGTH 1024
+void console_debug(const char *fmt, ...)
 {
-    scrollable_push(&ctx.dbg_win, msg);
-    form_driver(ctx.input_form, REQ_VALIDATION);    // move cursor to input form
+    va_list args;
+    va_start(args, fmt);
+    char buff[BUFF_LENGTH];
+    vsnprintf(buff, BUFF_LENGTH, fmt, args);
+    va_end(args);
+
+    scrollable_push(&ctx.dbg_win, buff, strlen(buff));
+    form_driver(ctx.input_form, REQ_VALIDATION); // move cursor to input form
 }
-void console_chat(const char *msg)
+void console_chat(const char *fmt, ...)
 {
-    scrollable_push(&ctx.chat_win, msg);
-    form_driver(ctx.input_form, REQ_VALIDATION);    // move cursor to input form
+    va_list args;
+    va_start(args, fmt);
+    char buff[BUFF_LENGTH];
+    vsnprintf(buff, BUFF_LENGTH, fmt, args);
+    va_end(args);
+
+    scrollable_push(&ctx.chat_win, buff, strlen(buff));
+    form_driver(ctx.input_form, REQ_VALIDATION); // move cursor to input form
 }
 void console_main(command_callback_t cmd_callback)
 {
     int c;
     while(ctx.running && (c = wgetch(ctx.input_win))) {
         switch(c) {
-        case KEY_RESIZE:
-            cctx_redraw_all();
-            break;
-        case KEY_LEFT:
-            form_driver(ctx.input_form, REQ_PREV_CHAR);
-            break;
-        case KEY_RIGHT:
-            form_driver(ctx.input_form, REQ_NEXT_CHAR);
-            break;
+        case KEY_RESIZE: cctx_redraw_all(); break;
+        case KEY_LEFT: form_driver(ctx.input_form, REQ_PREV_CHAR); break;
+        case KEY_RIGHT: form_driver(ctx.input_form, REQ_NEXT_CHAR); break;
 
         case KEY_BACKSPACE:
-        case 127:
-            form_driver(ctx.input_form, REQ_DEL_PREV);
-            break;
-        case KEY_DC:
-            form_driver(ctx.input_form, REQ_DEL_CHAR);
-            break;
+        case 127: form_driver(ctx.input_form, REQ_DEL_PREV); break;
+        case KEY_DC: form_driver(ctx.input_form, REQ_DEL_CHAR); break;
 
         case '\n': {
             form_driver(ctx.input_form, REQ_VALIDATION);
@@ -225,7 +260,7 @@ void console_main(command_callback_t cmd_callback)
                     cmd_callback(data);
                 }
             } else {
-                scrollable_push(&ctx.chat_win, data);
+                scrollable_push(&ctx.chat_win, data, strlen(data));
             }
             form_driver(ctx.input_form, REQ_CLR_FIELD);
             form_driver(ctx.input_form, REQ_VALIDATION);
@@ -241,9 +276,7 @@ void console_main(command_callback_t cmd_callback)
                 form_driver(ctx.input_form, c);
             }
             break;
-        default:
-            form_driver(ctx.input_form, c);
-            break;
+        default: form_driver(ctx.input_form, c); break;
         }
         wrefresh(ctx.input_win);
     }

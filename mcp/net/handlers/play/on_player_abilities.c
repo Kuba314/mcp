@@ -16,13 +16,9 @@ int on_player_abilities(stream_t *stream)
         return 1;
     }
 
-    debug_begin("player", "abilities: ");
-    debug_frag("invuln(%hhd) ", flags & 1);
-    debug_frag("fly(%hhd) ", (flags >> 1) & 1);
-    debug_frag("allow_fly(%hhd) ", (flags >> 2) & 1);
-    debug_frag("creative(%hhd) ", (flags >> 3) & 1);
-    debug_frag("fly_speed(%.02f) ", flying_speed);
-    debug_frag("fov_mod(%.02f)", fov_mod);
-    debug_end();
+    debug("player",
+          "abilities: invuln(%hhd) fly(%hhd) allow_fly(%hhd) creative(%hhd) fly_speed(%.02f) "
+          "fov_mod(%.02f)",
+          flags & 1, (flags >> 1) & 1, (flags >> 2) & 1, (flags >> 3) & 1, flying_speed, fov_mod);
     return 0;
 }

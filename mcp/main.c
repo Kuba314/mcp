@@ -47,23 +47,29 @@ void *run_main_loop(void *stream)
     return NULL;
 }
 
+void cmd_callback(const char *cmd)
+{
+    console_chat(cmd);
+}
+
 void run_console(stream_t *stream)
 {
     (void) stream;
-    while(running) {
-        char buff[1024];
-        if(fgets(buff, 1024, stdin) == 0) {
-            debug("console", "probably ctrl c");
-            return;
-        }
-        if(strncmp(buff, "exit", 4) == 0) {
-            running = false;
-            return;
-        } else if(strncmp(buff, "?", 1) == 0) {
-            debug("console", "sending chat message");
-            send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
-        }
-    }
+    console_main(cmd_callback);
+    // while(running) {
+    //     char buff[1024];
+    //     if(fgets(buff, 1024, stdin) == 0) {
+    //         debug("console", "probably ctrl c");
+    //         return;
+    //     }
+    //     if(strncmp(buff, "exit", 4) == 0) {
+    //         running = false;
+    //         return;
+    //     } else if(strncmp(buff, "?", 1) == 0) {
+    //         debug("console", "sending chat message");
+    //         send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
+    //     }
+    // }
 }
 void on_interrupt(int signum)
 {
@@ -94,6 +100,7 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+    console_init();
     if(config_filename == NULL) {
         config_filename = "user.cfg";
     }
@@ -126,6 +133,7 @@ int main(int argc, char *argv[])
     run_console(stream);
 
     pthread_join(thread, NULL);
+    console_free();
 
     stream_free(stream);
     free_config();

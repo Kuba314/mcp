@@ -9,9 +9,7 @@ int on_login_disconnect(stream_t *stream)
         return 1;
     }
 
-    info_begin("login", "disconnected: ");
-    print_string(reason);
-    info_end();
+    info("login", "disconnected: %.*s", reason->length, reason->s);
 
     string_free(reason);
     return 0;

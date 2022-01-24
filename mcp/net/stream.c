@@ -158,10 +158,7 @@ int stream_write_packet(stream_t *stream, buffer_t *buff)
 {
     sem_wait(&stream->lock);
 
-    verbose_begin("stream", "sending \"");
-    verbose_bytes(buff, buff->length);
-    verbose_frag("\"");
-    verbose_end();
+    verbose("stream", "sending packet[%ld]", buff->length);
 
     // copy data to own buffer
     void *src = malloc(buff->length);

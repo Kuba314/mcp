@@ -52,11 +52,8 @@ int on_player_list_item(stream_t *stream)
                 }
 
                 verbose("onpl", "prop: ");
-                print_string(prop_name);
-                verbose_frag(" => ");
-                print_string(prop_value);
-                verbose_frag(" (%s)", is_signed ? "(unsigned)" : signature->s);
-                verbose_end();
+                verbose("onpl", "%.*s => %.*s (%s)", prop_name->length, prop_name->s,
+                        prop_value->length, prop_value->s, is_signed ? "(unsigned)" : signature->s);
 
                 string_free(prop_name);
                 string_free(prop_value);

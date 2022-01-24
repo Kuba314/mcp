@@ -63,18 +63,25 @@ static unsigned char hex_value(json_char c)
 
     switch(c) {
     case 'a':
-    case 'A': return 0x0A;
+    case 'A':
+        return 0x0A;
     case 'b':
-    case 'B': return 0x0B;
+    case 'B':
+        return 0x0B;
     case 'c':
-    case 'C': return 0x0C;
+    case 'C':
+        return 0x0C;
     case 'd':
-    case 'D': return 0x0D;
+    case 'D':
+        return 0x0D;
     case 'e':
-    case 'E': return 0x0E;
+    case 'E':
+        return 0x0E;
     case 'f':
-    case 'F': return 0x0F;
-    default: return 0xFF;
+    case 'F':
+        return 0x0F;
+    default:
+        return 0xFF;
     }
 }
 
@@ -175,7 +182,8 @@ static int new_value(json_state *state, json_value **top, json_value **root, jso
             value->u.string.length = 0;
             break;
 
-        default: break;
+        default:
+            break;
         };
 
         return 1;
@@ -206,9 +214,11 @@ static int new_value(json_state *state, json_value **top, json_value **root, jso
 }
 
 #define whitespace                                                                                 \
-    case '\n': ++state.cur_line; state.cur_col = 0; /* FALLTHRU */                                 \
-    case ' ':                                       /* FALLTHRU */                                 \
-    case '\t':                                      /* FALLTHRU */                                 \
+    case '\n':                                                                                     \
+        ++state.cur_line;                                                                          \
+        state.cur_col = 0; /* FALLTHRU */                                                          \
+    case ' ':              /* FALLTHRU */                                                          \
+    case '\t':             /* FALLTHRU */                                                          \
     case '\r'
 
 #define string_add(b)                                                                              \
@@ -290,11 +300,21 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
                     flags &= ~flag_escaped;
 
                     switch(b) {
-                    case 'b': string_add('\b'); break;
-                    case 'f': string_add('\f'); break;
-                    case 'n': string_add('\n'); break;
-                    case 'r': string_add('\r'); break;
-                    case 't': string_add('\t'); break;
+                    case 'b':
+                        string_add('\b');
+                        break;
+                    case 'f':
+                        string_add('\f');
+                        break;
+                    case 'n':
+                        string_add('\n');
+                        break;
+                    case 'r':
+                        string_add('\r');
+                        break;
+                    case 't':
+                        string_add('\t');
+                        break;
                     case 'u':
 
                         if(end - state.ptr <= 4 || (uc_b1 = hex_value(*++state.ptr)) == 0xFF ||
@@ -368,7 +388,8 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
 
                         break;
 
-                    default: string_add(b);
+                    default:
+                        string_add(b);
                     };
 
                     continue;
@@ -410,7 +431,8 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
                         flags |= flag_seek_value | flag_need_colon;
                         continue;
 
-                    default: break;
+                    default:
+                        break;
                     };
                 } else {
                     string_add(b);
@@ -454,9 +476,13 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
                     }
 
                     switch(b = *state.ptr) {
-                    case '/': flags |= flag_line_comment; continue;
+                    case '/':
+                        flags |= flag_line_comment;
+                        continue;
 
-                    case '*': flags |= flag_block_comment; continue;
+                    case '*':
+                        flags |= flag_block_comment;
+                        continue;
 
                     default:
                         sprintf(error, "%u:%u: Unexpected `%c` in comment opening sequence",
@@ -658,7 +684,9 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
 
                         break;
 
-                    case '}': flags = (flags & ~flag_need_comma) | flag_next; break;
+                    case '}':
+                        flags = (flags & ~flag_need_comma) | flag_next;
+                        break;
 
                     case ',':
 
@@ -782,7 +810,8 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
                     flags |= flag_next | flag_reproc;
                     break;
 
-                default: break;
+                default:
+                    break;
                 };
             }
 
@@ -814,9 +843,12 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
 
                         break;
 
-                    case json_array: parent->u.array.values[parent->u.array.length] = top; break;
+                    case json_array:
+                        parent->u.array.values[parent->u.array.length] = top;
+                        break;
 
-                    default: break;
+                    default:
+                        break;
                     };
                 }
 
@@ -910,9 +942,12 @@ void json_value_free_ex(json_settings *settings, json_value *value)
             value = value->u.object.values[--value->u.object.length].value;
             continue;
 
-        case json_string: settings->mem_free(value->u.string.ptr, settings->user_data); break;
+        case json_string:
+            settings->mem_free(value->u.string.ptr, settings->user_data);
+            break;
 
-        default: break;
+        default:
+            break;
         };
 
         cur_value = value;

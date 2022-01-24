@@ -7,9 +7,7 @@ int on_server_status_response(stream_t *stream)
         return 1;
     }
 
-    info_begin("status", "");
-    print_string(status);
-    info_end();
+    info("status", "%.*s", status->length, status->s);
 
     string_free(status);
     return 0;
