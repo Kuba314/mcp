@@ -28,35 +28,48 @@ void scrollable_free(scrollable_window_t *sw)
         free(sw->buffer[(sw->buffer_offset + i) % SCROLLABLE_WINDOW_BUFFER_SIZE]);
     }
 }
+static int ssign_to_clr(char c)
+{
+    if(c >= '0' && c <= '9') {
+        return c - '0';
+    } else if(c >= 'a' && c <= 'f') {
+        return c - 'a' + 0xa;
+    } else if(c == 'r') {
+        return 0xf;
+    } else {
+        return -1;
+    }
+}
 static void redraw_scrollable(scrollable_window_t *sw)
 {
     size_t x, y;
     getmaxyx(sw->win, y, x);
     werase(sw->win);
 
+    // draw every message in line buffer that can fit on screen
     for(size_t i = 0; i < y && i < sw->msg_count; i++) {
         const char *msg =
             sw->buffer[(sw->buffer_offset + sw->msg_count - i - 1) % SCROLLABLE_WINDOW_BUFFER_SIZE];
         size_t msg_len = strlen(msg);
         size_t n_printed = 0;
 
+        // print line, while interpreting colors
         wmove(sw->win, y - i - 1, 0);
         bool escaped = false;
         for(size_t i = 0; i < msg_len; i++) {
-            if(msg_len > x) {
-                if(n_printed == x) {
-                    break;
-                } else if(n_printed >= x - 3) {
-                    // attroff(COLOR_PAIR(1));
-                    waddch(sw->win, '.');
-                    n_printed++;
-                    continue;
-                }
+
+            // print ellipsis if line doesn't fit
+            if(msg_len > x && n_printed >= x - 3) {
+                wattrset(sw->win, COLOR_PAIR(0x1f));
+                wprintw(sw->win, "%.*s", x - n_printed, "...");
+                break;
             }
+
             if(escaped) {
-                // const char *clr_prefix = get_color_prefix_from_ssign(msg[i]);
-                // attron(COLOR_PAIR(1));
-                // fputs(clr_prefix, stderr);
+                int clr_digit = ssign_to_clr(msg[i]);
+                if(clr_digit != -1) {
+                    wattron(sw->win, COLOR_PAIR(0x10 + clr_digit));
+                }
                 escaped = false;
             } else if(strncmp(msg + i, "§", 2) == 0) {
                 escaped = true;
@@ -64,11 +77,12 @@ static void redraw_scrollable(scrollable_window_t *sw)
             } else {
                 waddch(sw->win, msg[i]);
                 n_printed++;
-                // attroff(COLOR_PAIR(1));
             }
         }
-        // mvwprintw(sw->win, y - i - 2, 1, "%s", msg);
     }
+
+    // reset color and refresh screen
+    wattrset(sw->win, COLOR_PAIR(0x1f));
     wrefresh(sw->win);
 }
 int scrollable_push(scrollable_window_t *sw, const char *text, size_t length)
@@ -166,11 +180,50 @@ void cctx_redraw_all(void)
     wrefresh(ctx.input_win);
 }
 
+static void init_colors()
+{
+    if(!has_colors() || !can_change_color()) {
+        return;
+    }
+    start_color();
+    init_color(0x14, 666, 0, 0);        // §4 dark_red
+    init_color(0x1c, 1000, 333, 333);   // §c red
+    init_color(0x16, 1000, 666, 0);     // §6 gold
+    init_color(0x1e, 1000, 1000, 333);  // §e yellow
+    init_color(0x12, 0, 666, 0);        // §2 dark_green
+    init_color(0x1a, 333, 1000, 333);   // §a green
+    init_color(0x1b, 333, 1000, 1000);  // §b aqua
+    init_color(0x13, 0, 666, 666);      // §3 dark_aqua
+    init_color(0x11, 0, 0, 666);        // §1 dark_blue
+    init_color(0x19, 333, 333, 1000);   // §9 blue
+    init_color(0x1d, 1000, 333, 1000);  // §d light_purple
+    init_color(0x15, 666, 0, 666);      // §5 dark_purple
+    init_color(0x1f, 1000, 1000, 1000); // §f white
+    init_color(0x17, 666, 666, 666);    // §7 gray
+    init_color(0x18, 333, 333, 333);    // §8 dark_gray
+    init_color(0x10, 0, 0, 0);          // §0 black
+
+    init_pair(0x14, 0x14, COLOR_BLACK);
+    init_pair(0x1c, 0x1c, COLOR_BLACK);
+    init_pair(0x16, 0x16, COLOR_BLACK);
+    init_pair(0x1e, 0x1e, COLOR_BLACK);
+    init_pair(0x12, 0x12, COLOR_BLACK);
+    init_pair(0x1a, 0x1a, COLOR_BLACK);
+    init_pair(0x1b, 0x1b, COLOR_BLACK);
+    init_pair(0x13, 0x13, COLOR_BLACK);
+    init_pair(0x11, 0x11, COLOR_BLACK);
+    init_pair(0x19, 0x19, COLOR_BLACK);
+    init_pair(0x1d, 0x1d, COLOR_BLACK);
+    init_pair(0x15, 0x15, COLOR_BLACK);
+    init_pair(0x1f, 0x1f, COLOR_BLACK);
+    init_pair(0x17, 0x17, COLOR_BLACK);
+    init_pair(0x18, 0x18, COLOR_BLACK);
+    init_pair(0x10, 0x10, COLOR_BLACK);
+}
 void console_init(void)
 {
     initscr();
-    start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_colors();
     noecho();
     cbreak();
 
@@ -242,13 +295,23 @@ void console_main(command_callback_t cmd_callback)
     int c;
     while(ctx.running && (c = wgetch(ctx.input_win))) {
         switch(c) {
-        case KEY_RESIZE: cctx_redraw_all(); break;
-        case KEY_LEFT: form_driver(ctx.input_form, REQ_PREV_CHAR); break;
-        case KEY_RIGHT: form_driver(ctx.input_form, REQ_NEXT_CHAR); break;
+        case KEY_RESIZE:
+            cctx_redraw_all();
+            break;
+        case KEY_LEFT:
+            form_driver(ctx.input_form, REQ_PREV_CHAR);
+            break;
+        case KEY_RIGHT:
+            form_driver(ctx.input_form, REQ_NEXT_CHAR);
+            break;
 
         case KEY_BACKSPACE:
-        case 127: form_driver(ctx.input_form, REQ_DEL_PREV); break;
-        case KEY_DC: form_driver(ctx.input_form, REQ_DEL_CHAR); break;
+        case 127:
+            form_driver(ctx.input_form, REQ_DEL_PREV);
+            break;
+        case KEY_DC:
+            form_driver(ctx.input_form, REQ_DEL_CHAR);
+            break;
 
         case '\n': {
             form_driver(ctx.input_form, REQ_VALIDATION);
@@ -276,7 +339,9 @@ void console_main(command_callback_t cmd_callback)
                 form_driver(ctx.input_form, c);
             }
             break;
-        default: form_driver(ctx.input_form, c); break;
+        default:
+            form_driver(ctx.input_form, c);
+            break;
         }
         wrefresh(ctx.input_win);
     }
