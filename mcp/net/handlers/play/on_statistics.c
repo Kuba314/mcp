@@ -7,6 +7,11 @@ int on_statistics(stream_t *stream)
         return 1;
     }
 
+    if(count == 0) {
+        debug("player", "stats: {}");
+        return 0;
+    }
+
     debug("player", "stats: {");
     for(int32_t i = 0; i < count; i++) {
         string_t *field_name = stream_read_string(stream);

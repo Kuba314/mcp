@@ -67,6 +67,7 @@ static int parse_message_atom_text(buffer_t *buff, json_value *json)
 
     // write text to buffer if present
     if(text.s != NULL) {
+        printf("xd %s\n", text.s);
         buffer_write(buff, text.s, text.length);
         // bool escaped = false;
         // for(uint32_t i = 0; i < text.length; i++) {
@@ -135,10 +136,11 @@ static int print_chat_message(string_t *json)
     }
     json_value_free(parsed);
 
-    // info_begin("chat", "");
-    // print_bytes(buff->data, buff->length);
-    // info_end();
-    console_chat(buff->data);
+    if(console_is_running()) {
+        console_chat(buff->data);
+    } else {
+        info("chat", "%.*s", buff->length, buff->data);
+    }
 
     buffer_free(buff);
     return 0;

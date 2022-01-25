@@ -48,7 +48,6 @@ static int auth_create_encrypted_pair(string_t *pubkey, string_t *verify_token,
     // encrypt token
     *enc_verify_token = string_alloc(128);
     if(*enc_verify_token == NULL) {
-        perror("enc_verify_token string allocation");
         return 1;
     }
     RSA_public_encrypt(verify_token->length, (uint8_t *) verify_token->s,

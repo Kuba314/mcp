@@ -11,13 +11,13 @@ buffer_t *buffer_create()
 {
     buffer_t *buff = malloc(sizeof(buffer_t));
     if(buff == NULL) {
-        perror("buff_create");
+        alloc_error();
         return NULL;
     }
 
     buff->data = malloc(SOCKBUFF_INITIAL_SIZE);
     if(buff->data == NULL) {
-        perror("buff_create");
+        alloc_error();
         free(buff);
         return NULL;
     }

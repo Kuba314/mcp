@@ -1,9 +1,12 @@
 #pragma once
 
 #include <stdio.h>
+#include <string.h>
+#include <ncurses.h>
+#include <errno.h>
+
 #include "config.h"
 #include "console/console.h"
-#include <ncurses.h>
 
 void debug_with_colors(const char *fmt, ...);
 
@@ -41,6 +44,8 @@ void debug_with_colors(const char *fmt, ...);
 #endif
 
 #define alloc_error() error("alloc", "Failed to allocate memory")
+#define error_desc(category, msg, ...)                                                             \
+    debug_with_level(DBG_ERROR, CLR_RED, category, msg ": %s", ##__VA_ARGS__, strerror(errno))
 
 #define error(category, msg, ...) debug_with_level(DBG_ERROR, CLR_RED, category, msg, ##__VA_ARGS__)
 #define warn(category, msg, ...)                                                                   \

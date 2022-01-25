@@ -21,7 +21,7 @@ int stream_create(int sockfd, stream_t **stream)
     }
 
     if(sem_init(&(*stream)->lock, 0, 1)) {
-        perror("sem_init");
+        error_desc("stream", "could not create semaphore");
         free(stream);
         return 1;
     }
@@ -75,7 +75,7 @@ int stream_load_packet(stream_t *stream)
 
     int err = recv(stream->sockfd, packet_data, packet_length, MSG_WAITALL);
     if(err < 0) {
-        perror("stream_load_packet: recv");
+        error_desc("stream", "could not read packet data");
         return 1;
     } else if(err != packet_length) {
         warn("load_packet", "Didn't read enough, proceeding");
@@ -272,7 +272,7 @@ int stream_read_directly(stream_t *stream, void *dst, size_t length)
         }
 
         if((n_read = recv(stream->sockfd, encrypted, length, MSG_WAITALL)) < 0) {
-            perror("stream_read_directly: recv");
+            error_desc("stream", "could not read directly");
             return 1;
         } else if(n_read != (ssize_t) length) {
             error("stream_read_directly", "couldn't read enough (%ld / %ld)", n_read, length);
@@ -287,7 +287,7 @@ int stream_read_directly(stream_t *stream, void *dst, size_t length)
         free(encrypted);
     } else {
         if((n_read = recv(stream->sockfd, dst, length, MSG_WAITALL)) < 0) {
-            perror("stream_read_directly: recv");
+            error_desc("stream", "could not read directly");
             return 1;
         } else if(n_read != (ssize_t) length) {
             error("stream_read_directly", "couldn't read enough (%ld / %ld)", n_read, length);
