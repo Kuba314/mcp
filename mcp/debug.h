@@ -28,12 +28,11 @@ void debug_with_colors(const char *fmt, ...);
     #define debug_with_level(level, color, category, msg, ...)                                     \
         do {                                                                                       \
             if(level >= g_verbosity) {                                                             \
-                if(stdscr == NULL) {                                                               \
-                    debug_with_colors("[" color "%s" CLR_RESET "] " msg "\n", category,      \
+                if(stdscr == NULL || !g_console_enabled) {                                         \
+                    debug_with_colors("[" color "%s" CLR_RESET "] " msg "\n", category,            \
                                       ##__VA_ARGS__);                                              \
                 } else {                                                                           \
-                    console_debug("[" color "%s" CLR_RESET "] " msg, category,               \
-                                  ##__VA_ARGS__);                                                  \
+                    console_debug("[" color "%s" CLR_RESET "] " msg, category, ##__VA_ARGS__);     \
                 }                                                                                  \
             }                                                                                      \
         } while(0)

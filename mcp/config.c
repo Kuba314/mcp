@@ -13,7 +13,9 @@ char *g_login = NULL;
 char *g_password = NULL;
 char *g_username = NULL;
 
-int g_verbosity = 0;
+int g_verbosity = DBG_INFO;
+
+bool g_console_enabled = false;
 
 struct config_option {
     const char *key;

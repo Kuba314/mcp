@@ -26,4 +26,5 @@ int world_init()
 void world_free()
 {
     tablist_free(world->tablist);
+    free(world);
 }

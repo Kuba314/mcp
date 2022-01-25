@@ -20,11 +20,11 @@
 
 #define VERSION_ID_1_8_9 47
 
-// static bool running = true;
+static bool running = true;
 
 void *run_main_loop(void *stream)
 {
-    while(console_is_running()) {
+    while(console_is_running() || (!g_console_enabled && running)) {
 
         // load packet into memory
         if(stream_load_packet(stream)) {
@@ -44,7 +44,7 @@ void *run_main_loop(void *stream)
         stream_free_data(stream);
     }
     debug("thread", "handler exit");
-    // running = false;
+    running = false;
     return NULL;
 }
 
@@ -57,33 +57,38 @@ void run_console(stream_t *stream)
 {
     (void) stream;
     console_main(cmd_callback);
-    // while(running) {
-    //     char buff[1024];
-    //     if(fgets(buff, 1024, stdin) == 0) {
-    //         debug("console", "probably ctrl c");
-    //         return;
-    //     }
-    //     if(strncmp(buff, "exit", 4) == 0) {
-    //         running = false;
-    //         return;
-    //     } else if(strncmp(buff, "?", 1) == 0) {
-    //         debug("console", "sending chat message");
-    //         send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
-    //     }
-    // }
+}
+void run_without_console(stream_t *stream)
+{
+    while(running) {
+        char buff[1024];
+        if(fgets(buff, 1024, stdin) == 0) {
+            debug("console", "probably ctrl c");
+            running = false;
+            return;
+        }
+        if(strncmp(buff, "exit", 4) == 0) {
+            running = false;
+            return;
+        } else if(strncmp(buff, "?", 1) == 0) {
+            debug("console", "sending chat message");
+            send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
+        }
+    }
 }
 
 int main(int argc, char *argv[])
 {
     const char *config_filename = NULL;
-    g_verbosity = 0;
     for(int i = 0; i < argc; i++) {
         if(strcmp(argv[i], "-v") == 0) {
-            g_verbosity += 1;
+            g_verbosity -= 10;
         } else if(strcmp(argv[i], "-vv") == 0) {
-            g_verbosity += 2;
+            g_verbosity -= 20;
         } else if(strcmp(argv[i], "-vvv") == 0) {
-            g_verbosity += 3;
+            g_verbosity -= 30;
+        } else if(strcmp(argv[i], "--console") == 0) {
+            g_console_enabled = true;
         } else if(strcmp(argv[i], "-c") == 0) {
             if(i == argc - 1) {
                 error("args", "-c needs an argument");
@@ -96,11 +101,13 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
-    console_init();
     if(config_filename == NULL) {
         config_filename = "user.cfg";
     }
 
+    if(g_console_enabled) {
+        console_init();
+    }
     if(load_config(config_filename)) {
         return 1;
     }
@@ -126,7 +133,11 @@ int main(int argc, char *argv[])
     pthread_create(&thread, NULL, run_main_loop, stream);
 
     // signal(SIGINT, on_interrupt);
-    run_console(stream);
+    if(g_console_enabled) {
+        run_console(stream);
+    } else {
+        run_without_console(stream);
+    }
 
     pthread_join(thread, NULL);
     console_free();

@@ -17,6 +17,7 @@ typedef struct {
 
 hashmap_t *hashmap_create(size_t bucket_count);
 void hashmap_free(hashmap_t *hashmap);
+void hashmap_free_all(hashmap_t *hashmap);
 
 int hashmap_put(hashmap_t *hashmap, const char *key, void *data);
 void *hashmap_remove(hashmap_t *hashmap, const char *key);

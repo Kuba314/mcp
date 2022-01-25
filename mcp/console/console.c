@@ -171,7 +171,8 @@ void console_free(void)
     endwin();
 }
 
-bool console_is_running(void) {
+bool console_is_running(void)
+{
     return ctx.running;
 }
 
@@ -186,7 +187,7 @@ void console_debug(const char *fmt, ...)
 
     scrollable_push(&ctx.dbg_win, buff, strlen(buff));
     scrollable_redraw(&ctx.dbg_win);
-    wrefresh(ctx.input_win);        // focus input form again
+    wrefresh(ctx.input_win); // focus input form again
 }
 void console_chat(const char *fmt, ...)
 {
@@ -198,7 +199,7 @@ void console_chat(const char *fmt, ...)
 
     scrollable_push(&ctx.chat_win, buff, strlen(buff));
     scrollable_redraw(&ctx.chat_win);
-    wrefresh(ctx.input_win);        // focus input form again
+    wrefresh(ctx.input_win); // focus input form again
 }
 void console_main(command_callback_t cmd_callback)
 {
