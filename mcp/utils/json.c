@@ -990,7 +990,7 @@ int json_extract_string(json_value *json, string_t **dest, ...)
             }
         }
         if(!found_key) {
-            error("json", "key %s not found in object", curr);
+            error("json", "key \"%s\" not found in object", curr);
             va_end(args);
             return 1;
         }

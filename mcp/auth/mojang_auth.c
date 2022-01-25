@@ -240,7 +240,7 @@ int authenticate_with_mojang(string_t *server_id, string_t *pubkey)
         return 1;
     }
 
-    verbose("auth", "sha1: %.*s", hash_length, hash_hex);
+    verbose("auth", "sha1: \"%.*s\"", hash_length, hash_hex);
 
     string_t *server_id_hash = string_create((char *) hash_hex, hash_length);
 

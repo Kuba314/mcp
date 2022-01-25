@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <signal.h>
 
+#include "console/console.h"
 #include "net/packet_handler.h"
 #include "net/stream.h"
 #include "net/connection.h"
@@ -19,11 +20,11 @@
 
 #define VERSION_ID_1_8_9 47
 
-static bool running = true;
+// static bool running = true;
 
 void *run_main_loop(void *stream)
 {
-    while(running) {
+    while(console_is_running()) {
 
         // load packet into memory
         if(stream_load_packet(stream)) {
@@ -43,7 +44,7 @@ void *run_main_loop(void *stream)
         stream_free_data(stream);
     }
     debug("thread", "handler exit");
-    running = false;
+    // running = false;
     return NULL;
 }
 
@@ -70,11 +71,6 @@ void run_console(stream_t *stream)
     //         send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
     //     }
     // }
-}
-void on_interrupt(int signum)
-{
-    (void) signum;
-    running = false;
 }
 
 int main(int argc, char *argv[])
@@ -129,13 +125,14 @@ int main(int argc, char *argv[])
     pthread_t thread;
     pthread_create(&thread, NULL, run_main_loop, stream);
 
-    signal(SIGINT, on_interrupt);
+    // signal(SIGINT, on_interrupt);
     run_console(stream);
 
     pthread_join(thread, NULL);
     console_free();
 
     stream_free(stream);
+    world_free();
     free_config();
     return 0;
 }

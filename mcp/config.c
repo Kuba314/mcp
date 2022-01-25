@@ -74,7 +74,7 @@ int load_config(const char *filename)
     if(missing_option) {
         return 1;
     }
-    debug("config", "config loaded from %s", filename);
+    debug("config", "config loaded from \"%s\"", filename);
     return 0;
 }
 void free_config()

@@ -15,7 +15,11 @@ int tablist_add_player(tablist_t *tablist, const char *uuid, char *name, int32_t
     list_item->displayname = displayname;
     debug("tablist", "add player %s gm(%d) ping(%d) dispname(%s)", name, gamemode, ping,
           (displayname == NULL) ? "(nil)" : displayname);
-    return hashmap_put(tablist, uuid, list_item);
+    if(hashmap_put(tablist, uuid, list_item)) {
+        free(list_item);
+        return 0;   // player already there, not an error though
+    }
+    return 0;
 }
 int tablist_remove_player(tablist_t *tablist, char *uuid)
 {

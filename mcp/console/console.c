@@ -171,6 +171,10 @@ void console_free(void)
     endwin();
 }
 
+bool console_is_running(void) {
+    return ctx.running;
+}
+
 #define BUFF_LENGTH 1024
 void console_debug(const char *fmt, ...)
 {
@@ -227,12 +231,19 @@ void console_main(command_callback_t cmd_callback)
             form_driver(ctx.input_form, REQ_DEL_CHAR);
             break;
 
+        case 4: // ^D
+            ctx.running = false;
+            break;
+
         case '\n': {
             form_driver(ctx.input_form, REQ_VALIDATION);
             char *data = trim_whitespace(field_buffer(ctx.fields[0], 0));
             if(ctx.cmd_mode) {
                 if(strcmp(data, "exit") == 0) {
                     ctx.running = false;
+                } else if(strcmp(data, "stop") == 0) {
+                    ctx.running = false;
+                    fgetc(stdin);
                 } else {
                     cmd_callback(data);
                 }

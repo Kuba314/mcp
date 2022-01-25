@@ -29,11 +29,11 @@ void debug_with_colors(const char *fmt, ...);
         do {                                                                                       \
             if(level >= g_verbosity) {                                                             \
                 if(stdscr == NULL) {                                                               \
-                    debug_with_colors("%s:%d [" color "%s" CLR_RESET "] " msg "\n", __FILENAME__,  \
-                                      __LINE__, category, ##__VA_ARGS__);                          \
+                    debug_with_colors("[" color "%s" CLR_RESET "] " msg "\n", category,      \
+                                      ##__VA_ARGS__);                                              \
                 } else {                                                                           \
-                    console_debug("%s:%d [" color "%s" CLR_RESET "] " msg, __FILENAME__, __LINE__, \
-                                  category, ##__VA_ARGS__);                                        \
+                    console_debug("[" color "%s" CLR_RESET "] " msg, category,               \
+                                  ##__VA_ARGS__);                                                  \
                 }                                                                                  \
             }                                                                                      \
         } while(0)

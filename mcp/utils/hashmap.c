@@ -67,7 +67,7 @@ int hashmap_put(hashmap_t *hashmap, const char *key, void *data)
     while(curr != NULL) {
         if(strcmp(curr->key, key) == 0) {
             error("hashmap", "already contains key \"%s\"", key);
-            return 0;
+            return 1;
         }
 
         last = curr;

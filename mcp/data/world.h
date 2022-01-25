@@ -7,5 +7,6 @@ typedef struct {
 } world_t;
 
 int world_init();
+void world_free();
 
 extern world_t *world;
