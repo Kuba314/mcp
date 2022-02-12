@@ -17,7 +17,7 @@ int tablist_add_player(tablist_t *tablist, const char *uuid, char *name, int32_t
           (displayname == NULL) ? "(nil)" : displayname);
     if(hashmap_put(tablist, uuid, list_item)) {
         free(list_item);
-        return 0; // player already there, not an error though
+        return 1;
     }
     return 0;
 }
