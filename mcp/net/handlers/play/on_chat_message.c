@@ -34,17 +34,21 @@ static int parse_message_atom_text(buffer_t *buff, json_value *json)
     for(uint32_t i = 0; i < json->u.object.length; i++) {
         json_object_entry entry = json->u.object.values[i];
 
-        if(entry.value->type != json_string)
-            continue;
-
-        if(strncmp(entry.name, "text", entry.name_length) == 0) {
-            text.s = entry.value->u.string.ptr;
-            text.length = entry.value->u.string.length;
-        } else if(strncmp(entry.name, "color", entry.name_length) == 0) {
-            color.s = entry.value->u.string.ptr;
-            color.length = entry.value->u.string.length;
-        } else {
-            debug("json_key", "%s", entry.name);
+        if(entry.value->type == json_string) {
+            if(strcmp(entry.name, "text") == 0) {
+                text.s = entry.value->u.string.ptr;
+                text.length = entry.value->u.string.length;
+            } else if(strcmp(entry.name, "color") == 0) {
+                color.s = entry.value->u.string.ptr;
+                color.length = entry.value->u.string.length;
+            }
+        } else if(entry.value->type == json_array) {
+            if(strcmp(entry.name, "with") == 0) {
+                if(entry.value->u.array.length == 2 && entry.value->u.array.values[1]->type == json_string) {
+                    text.s = entry.value->u.array.values[1]->u.string.ptr;
+                    text.length = entry.value->u.array.values[1]->u.string.length;
+                }
+            }
         }
     }
 
@@ -67,27 +71,84 @@ static int parse_message_atom_text(buffer_t *buff, json_value *json)
 
     // write text to buffer if present
     if(text.s != NULL) {
-        printf("xd %s\n", text.s);
         buffer_write(buff, text.s, text.length);
-        // bool escaped = false;
-        // for(uint32_t i = 0; i < text.length; i++) {
-        //     if(escaped) {
-        //         const char *clr_prefix = get_color_prefix_from_ssign(text.s[i]);
-        //         buffer_write(buff, clr_prefix, strlen(clr_prefix));
-        //         escaped = false;
-        //     } else if(strncmp(text.s + i, "§", 2) == 0) {
-        //         escaped = true;
-        //         i++; // skip second § char
-        //     } else {
-        //         buffer_write(buff, &text.s[i], 1);
-        //     }
-        // }
     }
-    // write SOMETHING? and reset
-    // buffer_write(buff, "\033(B\033[m", strlen("\033(B\033[m"));
-    buffer_write(buff, "\033[m", strlen("\033[m"));
     return 0;
 }
+
+static int write_message_to_buffer(buffer_t *buff, json_value *json)
+{
+    json_value *translate = json_extract(json, "translate");
+    if(translate != NULL && translate->type == json_string) {
+        json_value *with = json_extract(json, "with");
+        if(with != NULL && with->type == json_array) {
+            if(strcmp(translate->u.string.ptr, "chat.type.text") == 0) {
+                debug("chat", "someone sent a message");
+            } else if(strcmp(translate->u.string.ptr, "death.attack.player") == 0) {
+                debug("chat", "someone got killed");
+            }
+            return 0;
+        }
+    }
+    // if(json->type != json_object) {
+    //     error("json", "chat message json is not an object");
+    //     return 1;
+    // }
+    // const char *translate_as = NULL;
+    // json_value **with = NULL;
+    // uint32_t with_length = NULL;
+    // for(uint32_t i = 0; i < json->u.object.length; i++) {
+    //     json_object_entry entry = json->u.object.values[i];
+
+    //     if(strcmp(entry.name, "translate") == 0 && entry.value->type == json_string) {
+    //         translate_as = entry.value->u.string.ptr;
+    //         break;
+    //     } else if(strcmp(entry.name, "with") == 0 && entry.value->type == json_array) {
+    //         with = entry.value->u.array.values;
+    //         with_length = entry.value->u.array.length;
+    //     }
+    // }
+    // if(translate_as != NULL && ) {
+    //     if(strcmp(translate_as, "chat.type.text") == 0) {
+    //         if(with_length != 2) {
+    //             return 1;
+    //         }
+    //         json_extract_string()
+
+    //     } else if(strcmp(translate_as, "death.attack.player") == 0) {
+
+    //     }
+    // }
+
+    if(parse_message_atom_text(buff, json)) {
+        json_value_free(json);
+        buffer_free(buff);
+        return 1;
+    }
+    for(uint32_t i = 0; i < json->u.object.length; i++) {
+        json_object_entry entry = json->u.object.values[i];
+
+        if(strncmp(entry.name, "extra", entry.name_length) == 0) {
+            if(entry.value->type != json_array) {
+                error("json", "\"extra\" value is not array, but %d", entry.value->type);
+                json_value_free(json);
+                buffer_free(buff);
+                return 1;
+            }
+
+            for(uint32_t j = 0; j < entry.value->u.array.length; j++) {
+                json_value *extra_el = entry.value->u.array.values[j];
+                if(parse_message_atom_text(buff, extra_el)) {
+                    json_value_free(json);
+                    buffer_free(buff);
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 static int print_chat_message(string_t *json)
 {
     json_value *parsed = json_parse(json->s, json->length);
@@ -108,38 +169,18 @@ static int print_chat_message(string_t *json)
         return 1;
     }
 
-    if(parse_message_atom_text(buff, parsed)) {
-        json_value_free(parsed);
-        buffer_free(buff);
-        return 1;
-    }
-    for(uint32_t i = 0; i < parsed->u.object.length; i++) {
-        json_object_entry entry = parsed->u.object.values[i];
-
-        if(strncmp(entry.name, "extra", entry.name_length) == 0) {
-            if(entry.value->type != json_array) {
-                error("json", "\"extra\" value is not array, but %d", entry.value->type);
-                json_value_free(parsed);
-                buffer_free(buff);
-                return 1;
-            }
-
-            for(uint32_t j = 0; j < entry.value->u.array.length; j++) {
-                json_value *extra_el = entry.value->u.array.values[j];
-                if(parse_message_atom_text(buff, extra_el)) {
-                    json_value_free(parsed);
-                    buffer_free(buff);
-                    return 1;
-                }
-            }
-        }
-    }
+    write_message_to_buffer(buff, parsed);
     json_value_free(parsed);
 
+    if(buff->length == 0) {
+        return 0;
+    }
+
     if(console_is_running()) {
+        // info("chat", "[%d] %.*s", buff->length, buff->length, buff->data);
         console_chat(buff->data);
     } else {
-        info("chat", "%.*s", buff->length, buff->data);
+        info("chat", "[%d] %.*s", buff->length, buff->length, buff->data);
     }
 
     buffer_free(buff);

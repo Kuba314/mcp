@@ -127,7 +127,8 @@ json_value *json_parse_ex(json_settings *settings, const json_char *json, size_t
 
 void json_value_free(json_value *);
 
-int json_extract_string(json_value *json, string_t **dest, ...);
+int json_extract_string(json_value *json, const char *route, string_t **dest);
+json_value *json_extract(json_value *json, const char *route);
 
 /* Not usually necessary, unless you used a custom mem_alloc and now want to
  * use a custom mem_free.

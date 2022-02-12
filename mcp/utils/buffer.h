@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "utils/dynstring.h"
 
@@ -31,12 +32,14 @@ inline int buffer_write_short(buffer_t *buff, uint16_t value)
     int err = buffer_write_byte(buff, value >> 8);
     return err || buffer_write_byte(buff, value & 0xff);
 }
-inline int buffer_write_c_string(buffer_t *buff, const char *src, size_t length)
+inline int buffer_write_c_string(buffer_t *buff, const char *src)
 {
+    size_t length = strlen(src);
     int ret = buffer_write_varint(buff, length);
     return ret || buffer_write(buff, src, length);
 }
 inline int buffer_write_string(buffer_t *buff, string_t *string)
 {
-    return buffer_write_c_string(buff, string->s, string->length);
+    int ret = buffer_write_varint(buff, string->length);
+    return ret || buffer_write(buff, string->s, string->length);
 }

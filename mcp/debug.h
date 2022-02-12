@@ -1,9 +1,9 @@
 #pragma once
 
+#include <errno.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
-#include <ncurses.h>
-#include <errno.h>
 
 #include "config.h"
 #include "console/console.h"
@@ -19,6 +19,7 @@ void debug_with_colors(const char *fmt, ...);
     #define DBG_INFO 30
     #define DBG_DEBUG 20
     #define DBG_VERBOSE 10
+    #define DBG_MUD 0
 
     #define CLR_RED "§c"
     #define CLR_ORANGE "§e"
@@ -55,3 +56,4 @@ void debug_with_colors(const char *fmt, ...);
     debug_with_level(DBG_DEBUG, CLR_CYAN, category, msg, ##__VA_ARGS__)
 #define verbose(category, msg, ...)                                                                \
     debug_with_level(DBG_VERBOSE, CLR_GRAY, category, msg, ##__VA_ARGS__)
+#define mud(category, msg, ...) debug_with_level(DBG_MUD, CLR_RESET, category, msg, ##__VA_ARGS__)

@@ -158,7 +158,13 @@ int stream_write_packet(stream_t *stream, buffer_t *buff)
 {
     sem_wait(&stream->lock);
 
-    verbose("stream", "sending packet[%ld]", buff->length);
+    char dbg_buff[1024 + 1];
+    size_t i;
+    for(i = 0; i < buff->length && i < 1024 / 4; i++) {
+        sprintf(&dbg_buff[4 * i], "\\x%02x", buff->data[i]);
+    }
+    dbg_buff[i * 4] = '\0';
+    verbose("stream", "sending packet[%ld] \"%s\"", buff->length, dbg_buff);
 
     // copy data to own buffer
     void *src = malloc(buff->length);

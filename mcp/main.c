@@ -21,6 +21,7 @@
 #define VERSION_ID_1_8_9 47
 
 static bool running = true;
+static stream_t *stream;
 
 void *run_main_loop(void *stream)
 {
@@ -48,31 +49,51 @@ void *run_main_loop(void *stream)
     return NULL;
 }
 
-void cmd_callback(const char *cmd)
+int cmd_callback(const char *cmd)
 {
-    console_chat(cmd);
+    if(strcmp(cmd, "exit") == 0) {
+        running = false;
+        return 1;
+    } else if(strcmp(cmd, "respawn") == 0) {
+        send_ClientStatus(stream, ACTION_ID_RESPAWN);
+        info("play", "respawning...");
+    } else {
+        error("cmd", "Unknown command: \"%s\"", cmd);
+    }
+    return 0;
+}
+void chat_callback(const char *msg)
+{
+    send_ChatMessage(stream, msg);
 }
 
-void run_console(stream_t *stream)
+void run_console(void)
 {
-    (void) stream;
-    console_main(cmd_callback);
+    console_main(cmd_callback, chat_callback);
 }
-void run_without_console(stream_t *stream)
+void run_without_console(void)
 {
+    char buff[1024 + 1];
     while(running) {
-        char buff[1024];
         if(fgets(buff, 1024, stdin) == 0) {
             debug("console", "probably ctrl c");
             running = false;
             return;
         }
-        if(strncmp(buff, "exit", 4) == 0) {
-            running = false;
-            return;
-        } else if(strncmp(buff, "?", 1) == 0) {
-            debug("console", "sending chat message");
-            send_ChatMessage(stream, buff + 1, strlen(buff) - 1);
+
+        size_t buff_len = strlen(buff);
+        if(buff_len == 0) {
+            continue;
+        } else if(buff[buff_len - 1] == '\n') {
+            buff[buff_len - 1] = '\0';
+        }
+
+        if(buff[0] == '?' && buff[1]) {
+            if(cmd_callback(buff + 1)) {
+                return;
+            }
+        } else {
+            chat_callback(buff);
         }
     }
 }
@@ -80,6 +101,7 @@ void run_without_console(stream_t *stream)
 int main(int argc, char *argv[])
 {
     const char *config_filename = NULL;
+    const char *server = NULL;
     for(int i = 0; i < argc; i++) {
         if(strcmp(argv[i], "-v") == 0) {
             g_verbosity -= 10;
@@ -94,12 +116,21 @@ int main(int argc, char *argv[])
                 error("args", "-c needs an argument");
                 return 1;
             }
-            config_filename = argv[i + 1];
-            i++;
+            config_filename = argv[++i];
+        } else if(strcmp(argv[i], "-s") == 0) {
+            if(i == argc - 1) {
+                error("args", "-s needs an argument");
+                return 1;
+            }
+            server = argv[++i];
         } else if(i >= 1) {
             error("args", "invalid option: \"%s\"", argv[i]);
             return 1;
         }
+    }
+    if(server == NULL) {
+        error("args", "need to have a server address set (-s)");
+        return 1;
     }
     if(config_filename == NULL) {
         config_filename = "user.cfg";
@@ -116,27 +147,28 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    const uint16_t port = 25565;
+
     // int sockfd = connect_to_server(HYPIXEL_IP, 25565);
-    int sockfd = connect_to_server(LOCALHOST, 25565);
+    int sockfd = connect_to_server(server, port);
     if(sockfd < 0) {
         return 1;
     }
 
-    stream_t *stream;
     if(stream_create(sockfd, &stream)) {
         return 1;
     }
-    send_Handshake(stream, VERSION_ID_1_8_9, 2);
-    send_LoginStart(stream, g_username, strlen(g_username));
+    send_Handshake(stream, VERSION_ID_1_8_9, "mc.hypixel.net", port, CONN_STATE_LOGIN);
+    send_LoginStart(stream, g_username);
 
     pthread_t thread;
     pthread_create(&thread, NULL, run_main_loop, stream);
 
     // signal(SIGINT, on_interrupt);
     if(g_console_enabled) {
-        run_console(stream);
+        run_console();
     } else {
-        run_without_console(stream);
+        run_without_console();
     }
 
     pthread_join(thread, NULL);

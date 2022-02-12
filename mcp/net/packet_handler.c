@@ -128,10 +128,8 @@ int handle_packet(int32_t packet_id, stream_t *stream)
         }
     }
 
-    if(g_verbosity >= DBG_WARN) {
-        warn("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(),
-             packet_id);
-    }
+    mud("packet_handler", "missing packet handler \"%s\", id 0x%02x, ", get_conn_state_name(),
+        packet_id);
 
     return 0;
 }

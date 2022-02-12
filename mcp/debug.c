@@ -35,7 +35,7 @@ static const char *get_color_prefix_from_ssign(char c)
     return colors[(uint8_t) c];
 }
 
-#define BUFF_LENGTH 256
+#define BUFF_LENGTH 1048576
 
 void debug_with_colors(const char *fmt, ...)
 {

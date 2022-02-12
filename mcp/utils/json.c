@@ -963,47 +963,94 @@ void json_value_free(json_value *value)
     json_value_free_ex(&settings, value);
 }
 
-int json_extract_string(json_value *json, string_t **dest, ...)
+json_value *json_extract(json_value *json, const char *route)
 {
-    va_list args;
-    va_start(args, dest);
+    char buff[1024];
+    strcpy(buff, route);
+    const char *delim = ".";
+    char *token = strtok(buff, delim);
 
-    json_value *obj = json;
-    const char *curr = va_arg(args, const char *);
-    bool found_key;
-    while(curr != NULL) {
-        if(obj->type != json_object) {
-            error("json", "not an object");
-            va_end(args);
-            return 1;
-        }
+    do {
+        if(!*token) {
+            continue;
+        } else if(*token == '#') {
+            uint32_t num = atoi(token);
+            if(json->type != json_array || num >= json->u.array.length) {
+                return NULL;
+            }
+            json = json->u.array.values[num];
+        } else {
+            if(json->type != json_object) {
+                return NULL;
+            }
 
-        found_key = false;
-        for(uint32_t i = 0; i < obj->u.object.length; i++) {
-            json_object_entry entry = obj->u.object.values[i];
+            bool found = false;
+            for(uint32_t i = 0; i < json->u.object.length; i++) {
+                json_object_entry entry = json->u.object.values[i];
 
-            if(strncmp(entry.name, curr, entry.name_length) == 0) {
-                obj = entry.value;
-                curr = va_arg(args, const char *);
-                found_key = true;
-                break;
+                if(strcmp(entry.name, token) == 0) {
+                    json = entry.value;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                return NULL;
             }
         }
-        if(!found_key) {
-            error("json", "key \"%s\" not found in object", curr);
-            va_end(args);
-            return 1;
-        }
-    }
-    va_end(args);
+    } while((token = strtok(NULL, delim)));
+    return json;
+}
 
-    if(obj->type != json_string) {
-        error("json", "json type is not a string");
+int json_extract_string(json_value *json, const char *route, string_t **dest)
+{
+    json_value *extracted = json_extract(json, route);
+    if(extracted->type != json_string) {
         return 1;
     }
-    *dest = string_create(obj->u.string.ptr, obj->u.string.length);
+    *dest = string_create(extracted->u.string.ptr, extracted->u.string.length);
     if(*dest == NULL) {
         return 1;
     }
     return 0;
+
+    // va_list args;
+    // va_start(args, dest);
+
+    // json_value *obj = json;
+    // const char *curr = va_arg(args, const char *);
+    // bool found_key;
+    // while(curr != NULL) {
+    //     if(obj->type != json_object) {
+    //         va_end(args);
+    //         return 1;
+    //     }
+
+    //     found_key = false;
+    //     for(uint32_t i = 0; i < obj->u.object.length; i++) {
+    //         json_object_entry entry = obj->u.object.values[i];
+
+    //         if(strncmp(entry.name, curr, entry.name_length) == 0) {
+    //             obj = entry.value;
+    //             curr = va_arg(args, const char *);
+    //             found_key = true;
+    //             break;
+    //         }
+    //     }
+    //     if(!found_key) {
+    //         va_end(args);
+    //         return 1;
+    //     }
+    // }
+    // va_end(args);
+
+    // if(obj->type != json_string) {
+    //     error("json", "json type is not a string");
+    //     return 1;
+    // }
+    // *dest = string_create(obj->u.string.ptr, obj->u.string.length);
+    // if(*dest == NULL) {
+    //     return 1;
+    // }
+    // return 0;
 }

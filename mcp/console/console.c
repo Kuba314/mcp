@@ -27,7 +27,7 @@ static cctx_t ctx;
 static void cctx_set_cmd_mode(bool cmd_mode)
 {
     ctx.cmd_mode = cmd_mode;
-    mvwaddch(ctx.input_type_win, 0, 0, (cmd_mode) ? '/' : '>');
+    mvwaddch(ctx.input_type_win, 0, 0, (cmd_mode) ? '?' : '>');
     wrefresh(ctx.input_type_win);
 }
 static char *trim_whitespace(char *data)
@@ -201,7 +201,7 @@ void console_chat(const char *fmt, ...)
     scrollable_redraw(&ctx.chat_win);
     wrefresh(ctx.input_win); // focus input form again
 }
-void console_main(command_callback_t cmd_callback)
+void console_main(command_callback_t cmd_callback, chat_callback_t chat_callback)
 {
     int c;
     while(ctx.running && (c = wgetch(ctx.input_win))) {
@@ -246,10 +246,12 @@ void console_main(command_callback_t cmd_callback)
                     ctx.running = false;
                     fgetc(stdin);
                 } else {
-                    cmd_callback(data);
+                    if(cmd_callback(data)) {
+                        return;
+                    }
                 }
             } else {
-                scrollable_push(&ctx.chat_win, data, strlen(data));
+                chat_callback(data);
             }
             form_driver(ctx.input_form, REQ_CLR_FIELD);
             form_driver(ctx.input_form, REQ_VALIDATION);
@@ -258,7 +260,7 @@ void console_main(command_callback_t cmd_callback)
             break;
         }
 
-        case '/': {
+        case '?': {
             int x, y;
             getyx(ctx.input_win, y, x);
             (void) y;

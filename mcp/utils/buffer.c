@@ -56,7 +56,7 @@ int buffer_write(buffer_t *buff, const void *src, size_t length)
 
 extern int buffer_write_byte(buffer_t *buff, uint8_t byte);
 extern int buffer_write_short(buffer_t *buff, uint16_t value);
-extern int buffer_write_c_string(buffer_t *buff, const char *src, size_t length);
+extern int buffer_write_c_string(buffer_t *buff, const char *src);
 extern int buffer_write_string(buffer_t *buff, string_t *string);
 
 int buffer_write_varint(buffer_t *buff, int32_t value)

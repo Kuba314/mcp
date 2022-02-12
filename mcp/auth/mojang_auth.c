@@ -140,17 +140,17 @@ int mojang_authenticate(const char *username, const char *password, string_t **c
         error("json", "invalid response type");
         return 1;
     }
-    if(json_extract_string(parsed, client_token, "clientToken", NULL)) {
+    if(json_extract_string(parsed, "clientToken", client_token)) {
         return 1;
     }
     verbose("auth", "extracted clientToken: \"%s\"", (*client_token)->s);
 
-    if(json_extract_string(parsed, access_token, "accessToken", NULL)) {
+    if(json_extract_string(parsed, "accessToken", access_token)) {
         return 1;
     }
     verbose("auth", "extracted accessToken: \"%s\"", (*access_token)->s);
 
-    if(json_extract_string(parsed, uuid, "selectedProfile", "id", NULL)) {
+    if(json_extract_string(parsed, "selectedProfile.id", uuid)) {
         return 1;
     }
     verbose("auth", "extracted player uuid: \"%s\"", (*uuid)->s);
