@@ -7,6 +7,21 @@
 
 #include "debug.h"
 
+// handshake
+extern int send_Handshake(stream_t *stream, int32_t proto_version, const char *ip, uint16_t port, conn_state_t next_state);
+
+//status
+extern int send_StatusRequest(stream_t *stream);
+
+// login
+extern int send_LoginStart(stream_t *stream, const char *username);
+extern int send_EncryptionResponse(stream_t *stream, string_t *enc_aes_key, string_t *enc_verify_token);
+
+// play
+extern int send_KeepAlive(stream_t *stream, int32_t keep_alive_id);
+extern int send_ChatMessage(stream_t *stream, const char *message);
+extern int send_ClientStatus(stream_t *stream, enum action_id action_id);
+
 int send_packet(stream_t *stream, int packet_id, const char *data_str, ...)
 {
     buffer_t *buff = buffer_create();
@@ -57,11 +72,3 @@ int send_packet(stream_t *stream, int packet_id, const char *data_str, ...)
     buffer_free(buff);
     return 0;
 }
-
-extern int send_Handshake(stream_t *stream, int32_t proto_version, const char *ip, uint16_t port, conn_state_t next_state);
-extern int send_StatusRequest(stream_t *stream);
-extern int send_LoginStart(stream_t *stream, const char *username);
-extern int send_EncryptionResponse(stream_t *stream, string_t *enc_aes_key, string_t *enc_verify_token);
-extern int send_KeepAlive(stream_t *stream, int32_t keep_alive_id);
-extern int send_ChatMessage(stream_t *stream, const char *message);
-extern int send_ClientStatus(stream_t *stream, enum action_id action_id);

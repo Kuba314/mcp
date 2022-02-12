@@ -82,10 +82,47 @@ static int write_message_to_buffer(buffer_t *buff, json_value *json)
     if(translate != NULL && translate->type == json_string) {
         json_value *with = json_extract(json, "with");
         if(with != NULL && with->type == json_array) {
-            if(strcmp(translate->u.string.ptr, "chat.type.text") == 0) {
-                debug("chat", "someone sent a message");
+            if(strcmp(translate->u.string.ptr, "chat.type.text") == 0 && with->u.array.length == 2) {
+                json_value *username = json_extract(with->u.array.values[0], "text");
+                if(username == NULL) {
+                    error("chat", "no username in chat message");
+                    return 0;
+                } else if(username->type != json_string) {
+                    error("chat", "username is not a string");
+                    return 0;
+                }
+                json_value *message = with->u.array.values[1];
+                if(message == NULL) {
+                    error("chat", "no message in chat message");
+                    return 0;
+                } else if(username->type != json_string) {
+                    error("chat", "message is not a string");
+                    return 0;
+                }
+                buffer_write(buff, "<", 1);
+                buffer_write(buff, username->u.string.ptr, username->u.string.length);
+                buffer_write(buff, "> ", 2);
+                buffer_write(buff, message->u.string.ptr, message->u.string.length);
             } else if(strcmp(translate->u.string.ptr, "death.attack.player") == 0) {
-                debug("chat", "someone got killed");
+                json_value *username1 = json_extract(with->u.array.values[0], "text");
+                if(username1 == NULL) {
+                    error("chat", "no username in chat message");
+                    return 0;
+                } else if(username1->type != json_string) {
+                    error("chat", "username is not a string");
+                    return 0;
+                }
+                json_value *username2 = json_extract(with->u.array.values[1], "text");
+                if(username2 == NULL) {
+                    error("chat", "no username in chat message");
+                    return 0;
+                } else if(username2->type != json_string) {
+                    error("chat", "username is not a string");
+                    return 0;
+                }
+                buffer_write(buff, username1->u.string.ptr, username1->u.string.length);
+                buffer_write(buff, " was slain by ", strlen(" was slain by "));
+                buffer_write(buff, username2->u.string.ptr, username2->u.string.length);
             }
             return 0;
         }
@@ -151,14 +188,15 @@ static int write_message_to_buffer(buffer_t *buff, json_value *json)
 
 static int print_chat_message(string_t *json)
 {
+    verbose("chat", "%.*s", json->length, json->s);
     json_value *parsed = json_parse(json->s, json->length);
     if(parsed == NULL) {
-        error("json", "invalid chat json: %s", json->s);
+        error("chat", "invalid chat json: %s", json->s);
         return 1;
     }
 
     if(parsed->type != json_object) {
-        error("json", "invalid chat json type(%d): %s", parsed->type, json->s);
+        error("chat", "invalid chat json type(%d): %s", parsed->type, json->s);
         json_value_free(parsed);
         return 1;
     }
@@ -177,10 +215,9 @@ static int print_chat_message(string_t *json)
     }
 
     if(console_is_running()) {
-        // info("chat", "[%d] %.*s", buff->length, buff->length, buff->data);
         console_chat(buff->data);
     } else {
-        info("chat", "[%d] %.*s", buff->length, buff->length, buff->data);
+        info("chat", "%s", buff->data);
     }
 
     buffer_free(buff);
