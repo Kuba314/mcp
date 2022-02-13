@@ -90,6 +90,7 @@ static void init_colors()
         return;
     }
     start_color();
+    use_default_colors();
     init_color(0x14, 666, 0, 0);        // §4 dark_red
     init_color(0x1c, 1000, 333, 333);   // §c red
     init_color(0x16, 1000, 666, 0);     // §6 gold
@@ -107,22 +108,22 @@ static void init_colors()
     init_color(0x18, 333, 333, 333);    // §8 dark_gray
     init_color(0x10, 0, 0, 0);          // §0 black
 
-    init_pair(0x14, 0x14, COLOR_BLACK);
-    init_pair(0x1c, 0x1c, COLOR_BLACK);
-    init_pair(0x16, 0x16, COLOR_BLACK);
-    init_pair(0x1e, 0x1e, COLOR_BLACK);
-    init_pair(0x12, 0x12, COLOR_BLACK);
-    init_pair(0x1a, 0x1a, COLOR_BLACK);
-    init_pair(0x1b, 0x1b, COLOR_BLACK);
-    init_pair(0x13, 0x13, COLOR_BLACK);
-    init_pair(0x11, 0x11, COLOR_BLACK);
-    init_pair(0x19, 0x19, COLOR_BLACK);
-    init_pair(0x1d, 0x1d, COLOR_BLACK);
-    init_pair(0x15, 0x15, COLOR_BLACK);
-    init_pair(0x1f, 0x1f, COLOR_BLACK);
-    init_pair(0x17, 0x17, COLOR_BLACK);
-    init_pair(0x18, 0x18, COLOR_BLACK);
-    init_pair(0x10, 0x10, COLOR_BLACK);
+    init_pair(0x14, 0x14, -1);
+    init_pair(0x1c, 0x1c, -1);
+    init_pair(0x16, 0x16, -1);
+    init_pair(0x1e, 0x1e, -1);
+    init_pair(0x12, 0x12, -1);
+    init_pair(0x1a, 0x1a, -1);
+    init_pair(0x1b, 0x1b, -1);
+    init_pair(0x13, 0x13, -1);
+    init_pair(0x11, 0x11, -1);
+    init_pair(0x19, 0x19, -1);
+    init_pair(0x1d, 0x1d, -1);
+    init_pair(0x15, 0x15, -1);
+    init_pair(0x1f, 0x1f, -1);
+    init_pair(0x17, 0x17, -1);
+    init_pair(0x18, 0x18, -1);
+    init_pair(0x10, 0x10, -1);
 }
 void console_init(void)
 {

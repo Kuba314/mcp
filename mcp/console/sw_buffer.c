@@ -68,7 +68,7 @@ void scrollable_redraw(scrollable_window_t *sw)
             // print ellipsis if line doesn't fit
             if(msg_len > x && n_printed >= x - 3) {
                 wattrset(sw->win, COLOR_PAIR(0x1f));
-                wprintw(sw->win, "%.*s", x - n_printed, "...");
+                wprintw(sw->win, "%.*s", (int) (x - n_printed), "...");
                 break;
             }
 
