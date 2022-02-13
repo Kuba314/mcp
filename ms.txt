@@ -1,0 +1,36 @@
+client id: 75267598-be03-43bd-8055-f3c9e320cc06
+
+redirect?: https://login.microsoftonline.com/common/oauth2/nativeclient
+
+https://login.live.com/oauth20_authorize.srf?client_id=75267598-be03-43bd-8055-f3c9e320cc06&response_type=code&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient&scope=XboxLive.signin%20offline_access
+
+authcode: M.R3_BAY.deae047d-c6d9-c40a-bc9c-3ceb0c8b2550
+
+POST https://login.live.com/oauth20_token.srf
+ ?client_id=75267598-be03-43bd-8055-f3c9e320cc06
+ &client_secret=CCN7Q~Pr4hAYTyMiYgh3IMW4~5BxjdMwRc88j
+ &code=M.R3_BAY.deae047d-c6d9-c40a-bc9c-3ceb0c8b2550
+ &grant_type=authorization_code
+ &redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient
+
+import requests
+
+client_id = '75267598-be03-43bd-8055-f3c9e320cc06'
+client_secret = 'CCN7Q~Pr4hAYTyMiYgh3IMW4~5BxjdMwRc88j'
+redirect_uri = 'https://login.microsoftonline.com/common/oauth2/nativeclient'
+code = 'M.R3_BL2.af3b5eb3-f6e6-5c60-f773-626767b22a8e'
+
+url = 'https://login.live.com/oauth20_token.srf'
+data = {
+    'client_id': client_id,
+    'code': code,
+    'grant_type': 'authorization_code',
+    'redirect_uri': redirect_uri,
+}
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+r = requests.post(url, data=data, headers=headers)
+print(r.status_code)
+print(r.text)
+
