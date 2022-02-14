@@ -26,10 +26,11 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(700, 600)
         self.setCentralWidget(self.browser)
 
+        self.show()
+
     def on_url_change(self, url: QUrl):
         url_string: str = url.toString()
         if "?code=" not in url_string:
-            self.show()
             return
 
         client_code = url_string.split("?code=")[1]
@@ -165,7 +166,7 @@ def main() -> None:
     # print('access_token:', access_token)
     # print('refresh_token:', refresh_token)
 
-    xbl_token, user_hash = auth_xbl("0000000048093EE3")
+    xbl_token, user_hash = auth_xbl(access_token)
     print("xbl_token:", xbl_token)
     print("user_hash:", user_hash)
 
